@@ -8,10 +8,15 @@ from omegaconf import OmegaConf
 import torchvision.transforms as transforms
 from einops import rearrange
 import numpy as np
+import argparse
 
-def run_example():
+def run_inference_on_one_image(path_to_image, x_angle, y_angle, z_angle):
     device = "cuda:0" if torch.cuda.is_available() else "cpu"
-    config = OmegaConf.load("configs/sd-objaverse-finetune-c_concat-256.yaml")
+    print(f"device: {device}")
+    config_path = "configs/sd-objaverse-finetune-c_concat-256.yaml"
+    print(f"config_path: {config_path}")
+    config = OmegaConf.load(config_path)
+
     # Load the main model
     turncam = load_model_from_config(config, "105000.ckpt", device)
     carvekit = create_carvekit_interface()
@@ -20,7 +25,8 @@ def run_example():
 
     models = {"turncam": turncam, "carvekit": carvekit, "nsfw": nsfw, "clip_fe": clip_fe}
 
-    img = Image.open("apple.png").convert("RGBA")
+    print(f"path_to_image: {path_to_image}")
+    img = Image.open(path_to_image).convert("RGBA")
 
     # Run generation
     description, _fig, preproc, output_images = main_run(
@@ -32,7 +38,7 @@ def run_example():
                                 "encode_image": lambda *a: None,
                                 "update_figure": lambda *a: None}),
         return_what="gen",
-        x=0.0, y=90.0, z=0.0,  # view angles
+        x=x_angle, y=y_angle, z=z_angle,
         raw_im=img,
         preprocess=True,
         scale=3.0,
@@ -50,4 +56,26 @@ def run_example():
     print("Saved generated images.")
 
 if __name__ == "__main__":
-    run_example()
+    # Arguments
+    parser = argparse.ArgumentParser(description="Run Zero123 inference on an input image")
+    parser.add_argument(
+        "-i", "--image", required=True,
+        help="path to the input image",
+        type=str
+    )
+    parser.add_argument(
+        "--x", type=float, default=0.0,
+        help="camera angle x (default: 0.0)"
+    )
+    parser.add_argument(
+        "--y", type=float, default=90.0,
+        help="camera angle y (default: 90.0)"
+    )
+    parser.add_argument(
+        "--z", type=float, default=0.0,
+        help="camera angle z (default: 0.0)"
+    )
+    args = parser.parse_args()
+
+    run_inference_on_one_image(args.image, args.x, args.y, args.z)
+
