@@ -75,7 +75,7 @@ data:
     root_dir: 'views_whole_sphere'
     batch_size: 2
     num_workers: 0
-    total_view: 1
+    total_view: 2
     train:
       validation: False
       image_transforms:
@@ -92,7 +92,9 @@ lightning:
   metrics_over_trainsteps_checkpoint: True
   modelcheckpoint:
     params:
-      every_n_train_steps: 5000
+      every_n_train_steps: 1000
+      save_last: True
+      save_top_k: -1
   callbacks:
     image_logger:
       target: main.ImageLogger
