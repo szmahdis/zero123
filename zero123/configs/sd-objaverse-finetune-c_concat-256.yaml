@@ -73,9 +73,9 @@ data:
   target: ldm.data.simple.ObjaverseDataModuleFromConfig
   params:
     root_dir: 'views_whole_sphere'
-    batch_size: 192
-    num_workers: 16
-    total_view: 4
+    batch_size: 2
+    num_workers: 0
+    total_view: 1
     train:
       validation: False
       image_transforms:
@@ -112,6 +112,6 @@ lightning:
 
   trainer:
     benchmark: True
-    val_check_interval: 5000000 # really sorry
+    val_check_interval: 10 # really sorry
     num_sanity_val_steps: 0
     accumulate_grad_batches: 1
