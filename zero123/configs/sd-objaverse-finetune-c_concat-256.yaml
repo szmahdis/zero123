@@ -11,31 +11,31 @@ model:
     cond_stage_key: "image_cond"
     image_size: 32
     channels: 4
-    cond_stage_trainable: false   # Note: different from the one we trained before
+    cond_stage_trainable: false
     conditioning_key: hybrid
-    monitor: val/loss_simple_ema
+    monitor: train/loss_simple
     scale_factor: 0.18215
 
-    scheduler_config: # 10000 warmup steps
+    scheduler_config:
       target: ldm.lr_scheduler.LambdaLinearScheduler
       params:
-        warm_up_steps: [ 100 ]
-        cycle_lengths: [ 10000000000000 ] # incredibly large number to prevent corner cases
-        f_start: [ 1.e-6 ]
-        f_max: [ 1. ]
-        f_min: [ 1. ]
+        warm_up_steps: [100]
+        cycle_lengths: [100000000000
+        f_start: [1.e-6]
+        f_max: [1.]
+        f_min: [1.]
 
     unet_config:
       target: ldm.modules.diffusionmodules.openaimodel.UNetModel
       params:
-        image_size: 32 # unused
+        image_size: 32
         in_channels: 8
         out_channels: 4
         model_channels: 320
-        attention_resolutions: [ 4, 2, 1 ]
+        attention_resolutions: [4, 2, 1]
         num_res_blocks: 2
-        channel_mult: [ 1, 2, 4, 4 ]
-        num_heads: 8
+        channel_mult: [1, 2, 4, 4]    
+        num_heads: 8 
         use_spatial_transformer: True
         transformer_depth: 1
         context_dim: 768
@@ -55,10 +55,10 @@ model:
           out_ch: 3
           ch: 128
           ch_mult:
-          - 1
-          - 2
-          - 4
-          - 4
+            - 1
+            - 2
+            - 4
+            - 4
           num_res_blocks: 2
           attn_resolutions: []
           dropout: 0.0
@@ -68,52 +68,40 @@ model:
     cond_stage_config:
       target: ldm.modules.encoders.modules.FrozenCLIPImageEmbedder
 
-
 data:
-  target: ldm.data.simple.ObjaverseDataModuleFromConfig
+  target: simple_data_module.SimpleObjaverseDataModule
   params:
-    root_dir: 'views_whole_sphere'
-    batch_size: 2
-    num_workers: 0
+    root_dir: 'views_release'
+    batch_size: 1
+    num_workers: 8 
     total_view: 2
-    train:
-      validation: False
-      image_transforms:
-        size: 256
-
-    validation:
-      validation: True
-      image_transforms:
-        size: 256
-
+    image_size: 256
 
 lightning:
   find_unused_parameters: false
-  metrics_over_trainsteps_checkpoint: True
   modelcheckpoint:
+    target: pytorch_lightning.callbacks.ModelCheckpoint
     params:
-      every_n_train_steps: 1000
+      dirpath: "checkpoints"
+      filename: "{epoch:06}-{step:09}"
+      every_n_train_steps: 1
       save_last: True
       save_top_k: -1
+
   callbacks:
-    image_logger:
-      target: main.ImageLogger
+    simple_checkpoint:
+      target: simple_checkpoint_callback.SimpleCheckpointCallback
       params:
-        batch_frequency: 500
-        max_images: 32
-        increase_log_steps: False
-        log_first_step: True
-        log_images_kwargs:
-          use_ema_scope: False
-          inpaint: False
-          plot_progressive_rows: False
-          plot_diffusion_rows: False
-          N: 32
-          unconditional_guidance_scale: 3.0
-          unconditional_guidance_label: [""]
+        save_every_n_steps: 1
+        save_dir: "checkpoints"
+        filename_pattern: "simple-{epoch:06}-{step:09}"
 
   trainer:
     benchmark: True
-    val_check_interval: 10 # really sorry
+    val_check_interval: 1.0
     num_sanity_val_steps: 0
-    accumulate_grad_batches: 1
+    limit_val_batches: 0.0
+    accumulate_grad_batches: 2
+    gradient_clip_val: 1.0
+    deterministic: False
+    sync_batchnorm: False

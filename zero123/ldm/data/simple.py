@@ -201,7 +201,7 @@ class ObjaverseDataModuleFromConfig(pl.LightningDataModule):
         return wds.WebLoader(dataset, batch_size=self.batch_size, num_workers=self.num_workers, shuffle=False)
     
     def test_dataloader(self):
-        return wds.WebLoader(ObjaverseData(root_dir=self.root_dir, total_view=self.total_view, validation=self.validation),\
+        return wds.WebLoader(ObjaverseData(root_dir=self.root_dir, total_view=self.total_view, validation=False),\
                           batch_size=self.batch_size, num_workers=self.num_workers, shuffle=False)
 
 
