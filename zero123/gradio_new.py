@@ -655,7 +655,58 @@ def run_demo(
 
     demo.launch(share=True)
 
+@torch.no_grad()
+def run_inference_on_folder(
+        input_folder,
+        output_folder,
+        ckpt='105000.ckpt',
+        config='configs/sd-objaverse-finetune-c_concat-256.yaml',
+        device='cuda:0',
+        x=0.0, y=30.0, z=0.0,
+        scale=3.0, n_samples=1, ddim_steps=50, ddim_eta=1.0,
+        h=256, w=256):
+
+    import os
+    input_folder = os.path.abspath(input_folder)
+    folder_name = os.path.basename(input_folder.rstrip("/"))
+    output_folder = os.path.join(output_folder, folder_name)
+    os.makedirs(output_folder, exist_ok=True)
+
+    config = OmegaConf.load(config)
+    model = load_model_from_config(config, ckpt, device)
+    model.eval()
+    sampler = DDIMSampler(model)
+
+    from torchvision import transforms
+    from PIL import Image
+
+    img_paths = sorted([p for p in os.listdir(input_folder) if p.endswith('.png')])
+
+    for img_path in img_paths:
+        print(f'Processing: {img_path}')
+        raw_img = Image.open(os.path.join(input_folder, img_path)).convert('RGBA')
+        raw_img = raw_img.resize([256, 256], Image.Resampling.LANCZOS)
+        input_im = np.asarray(raw_img, dtype=np.float32) / 255.0
+
+        alpha = input_im[:, :, 3:4]
+        white = np.ones_like(input_im)
+        input_im = alpha * input_im + (1.0 - alpha) * white
+        input_im = input_im[:, :, :3]
+        input_im = transforms.ToTensor()(input_im).unsqueeze(0).to(device)
+        input_im = transforms.functional.resize(input_im * 2 - 1, [h, w])
+
+        samples = sample_model(input_im, model, sampler, 'fp32', h, w,
+                               ddim_steps, n_samples, scale, ddim_eta,
+                               x, y, z)
+        for i, x_sample in enumerate(samples):
+            out_img = 255. * rearrange(x_sample, 'c h w -> h w c').cpu().numpy()
+            out_img = Image.fromarray(out_img.astype(np.uint8))
+            out_img.save(os.path.join(output_folder, f'{img_path[:-4]}_pred_{i}.png'))
+
 
 if __name__ == '__main__':
-
-    fire.Fire(run_demo)
+    import fire
+    fire.Fire({
+        'gradio': run_demo,
+        'infer': run_inference_on_folder,
+    })
