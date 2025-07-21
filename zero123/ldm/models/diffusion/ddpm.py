@@ -523,6 +523,11 @@ class LatentDiffusion(DDPM):
         self.cond_stage_forward = cond_stage_forward
 
         # construct linear projection layer for concatenating image CLIP embedding and RT
+        # self.cc_projection = nn.Linear(772, 768)
+        ### ADDED BY ME ###
+        self.cc_projection = nn.Linear(778, 768)  # 768 (CLIP) + 4 (spherical) + 6 (plucker) = 778
+        ###
+
         self.cc_projection = nn.Linear(772, 768)
         nn.init.eye_(list(self.cc_projection.parameters())[0][:768, :768])
         nn.init.zeros_(list(self.cc_projection.parameters())[1])
@@ -749,7 +754,20 @@ class LatentDiffusion(DDPM):
         with torch.enable_grad():
             clip_emb = self.get_learned_conditioning(xc).detach()
             null_prompt = self.get_learned_conditioning([""]).detach()
-            cond["c_crossattn"] = [self.cc_projection(torch.cat([torch.where(prompt_mask, null_prompt, clip_emb), T[:, None, :]], dim=-1))]
+            # cond["c_crossattn"] = [self.cc_projection(torch.cat([torch.where(prompt_mask, null_prompt, clip_emb), T[:, None, :]], dim=-1))]
+        
+            ### ADDED BY ME ###
+            # get plucker coordinates from batch
+            T_plucker = batch['T_plucker'].to(memory_format=torch.contiguous_format).float()
+            if bs is not None:
+                T_plucker = T_plucker[:bs].to(self.device)
+
+            # combine 4d spherical coordinates with 6d plucker coordinates
+            T_combined = torch.cat([T, T_plucker], dim=-1)  # [batch, 10]
+
+            cond["c_crossattn"] = [self.cc_projection(torch.cat([torch.where(prompt_mask, null_prompt, clip_emb), T_combined[:, None, :]], dim=-1))]
+            ###
+
         cond["c_concat"] = [input_mask * self.encode_first_stage((xc.to(self.device))).mode().detach()]
         out = [z, cond]
         if return_first_stage_outputs:

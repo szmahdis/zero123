@@ -74,6 +74,7 @@ def load_model_from_config(config, ckpt, device, verbose=False):
 @torch.no_grad()
 def sample_model(input_im, model, sampler, precision, h, w, ddim_steps, n_samples, scale,
                  ddim_eta, x, y, z):
+    torch.cuda.empty_cache()  # Clear GPU memory before generation
     precision_scope = autocast if precision == 'autocast' else nullcontext
     with precision_scope('cuda'):
         with model.ema_scope():
@@ -544,13 +545,13 @@ def run_demo(
                     -0.5, 0.5, value=0.0, step=0.1, label='Zoom (relative distance from center)')
                 # info='Positive values move the camera further away, while negative values move the camera closer.')
 
-                samples_slider = gr.Slider(1, 8, value=4, step=1,
+                samples_slider = gr.Slider(1, 8, value=1, step=1,
                                            label='Number of samples to generate')
 
                 with gr.Accordion('Advanced options', open=False):
                     scale_slider = gr.Slider(0, 30, value=3, step=1,
                                              label='Diffusion guidance scale')
-                    steps_slider = gr.Slider(5, 200, value=75, step=5,
+                    steps_slider = gr.Slider(5, 200, value=25, step=5,
                                              label='Number of diffusion inference steps')
 
                 with gr.Row():
@@ -565,7 +566,6 @@ def run_demo(
                     label='Relationship between input (green) and output (blue) camera poses')
 
                 gen_output = gr.Gallery(label='Generated images from specified new viewpoint')
-                gen_output.style(grid=2)
 
                 preproc_output = gr.Image(type='pil', image_mode='RGB',
                                           label='Preprocessed input image', visible=_SHOW_INTERMEDIATE)
@@ -654,7 +654,7 @@ def run_demo(
                                     0.0, 180.0, 0.0),
                        inputs=preset_inputs, outputs=preset_outputs)
 
-    demo.launch(enable_queue=True, share=True)
+    demo.launch(share=True)
 
 
 if __name__ == '__main__':

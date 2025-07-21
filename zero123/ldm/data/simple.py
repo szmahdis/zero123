@@ -271,6 +271,72 @@ class ObjaverseData(Dataset):
         d_T = torch.tensor([d_theta.item(), math.sin(d_azimuth.item()), math.cos(d_azimuth.item()), d_z.item()])
         return d_T
 
+    ### ADDED BY ME ###
+    def get_plucker_coordinates(self, target_RT, cond_RT):
+        """
+        convert relative camera transformation to plucker coordinates.
+        args:
+            target_RT: 4x4 transformation matrix for target view
+            cond_RT: 4x4 transformation matrix for condition view
+        returns:
+            plucker_coords: 6-dimensional plucker coordinate vector
+        """
+        # extract rotation and translation from 4x4 transformation matrices
+        # [:3, :3] = first 3 rows, first 3 columns = 3x3 rotation matrix
+        # [:3, 3] = first 3 rows, 4th column = 3x1 translation vector
+        # the 4x4 matrix structure is: [R_3x3  t_3x1]
+        #                              [0_1x3   1   ]
+        R_target, t_target = target_RT[:3, :3], target_RT[:3, 3]
+        R_cond, t_cond = cond_RT[:3, :3], cond_RT[:3, 3] 
+        
+        # compute camera centers in world coordinates
+        # camera center = -R^T @ t (inverse transformation to get world position)
+        center_cond = -R_cond.T @ t_cond    # condition camera center in world coordinates
+        center_target = -R_target.T @ t_target  # target camera center in world coordinates
+        
+        # compute direction vector from condition camera to target camera
+        # this represents the spatial relationship between the two camera positions
+        direction = center_target - center_cond
+        
+        # handle edge case when cameras are at the same position
+        # if cameras are too close, use viewing direction difference instead
+        if np.linalg.norm(direction) < 1e-8:
+            # extract viewing directions from rotation matrices
+            # in camera coordinates: z-axis points forward
+            # R[:, 2] = third column of rotation matrix = where z-axis points in world coordinates
+            d_target = R_target[:, 2]  # target camera viewing direction in world coordinates
+            d_cond = R_cond[:, 2]      # condition camera viewing direction in world coordinates
+            direction = d_target - d_cond
+            
+            # if viewing directions are also identical, use default direction
+            # this prevents division by zero in normalization
+            if np.linalg.norm(direction) < 1e-8:
+                direction = np.array([1.0, 0.0, 0.0])  # default to x-axis direction
+        
+        # normalize direction vector to unit length (ensures consistent scale and numerical stability)
+        # this gives us the first 3 components of plucker coordinates
+        d_norm = direction / np.linalg.norm(direction)
+        
+        # compute moment vector: m = p × d
+        # the moment vector describes the line's position relative to the origin
+        # we use the condition camera center as our point p on the line
+        moment = np.cross(center_cond, d_norm)
+        
+        # normalize moment vector for consistency (ensures the plucker coordinates have consistent scale)
+        # handle case where moment vector might be zero
+        if np.linalg.norm(moment) > 1e-8:
+            m_norm = moment / np.linalg.norm(moment)
+        else:
+            m_norm = np.zeros(3)  # zero moment if cameras are on a line through origin
+        
+        # combine direction and moment into 6d plucker coordinates
+        # [d_x, d_y, d_z, m_x, m_y, m_z]
+        # first 3: direction vector (where the line points)
+        # last 3: moment vector (where the line is located relative to origin)
+        plucker_coords = np.concatenate([d_norm, m_norm])
+        
+        return torch.tensor(plucker_coords, dtype=torch.float32)
+
     def load_im(self, path, color):
         '''
         replace background pixel with random color in rendering
@@ -316,6 +382,9 @@ class ObjaverseData(Dataset):
         data["image_target"] = target_im
         data["image_cond"] = cond_im
         data["T"] = self.get_T(target_RT, cond_RT)
+
+        ### ADDED BY ME ###
+        data["T_plucker"] = self.get_plucker_coordinates(target_RT, cond_RT)
 
         if self.postprocess is not None:
             data = self.postprocess(data)
