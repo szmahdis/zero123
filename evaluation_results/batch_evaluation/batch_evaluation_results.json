@@ -1,0 +1,2271 @@
+{
+  "views_directory": "/cluster/51/ecekarasu/views_release",
+  "output_directory": "evaluation_results/batch_evaluation",
+  "object_ids": [
+    "0000d20857dd4651a0bd73a62d6fe155",
+    "000259fe35324ba796ce6e08b2961e3e",
+    "000736d4e4094e3fa159b98a3781c9d3",
+    "00089a40101d4c1487edf050b94f6008",
+    "00089c3928dc45eb8ac5ad2de2f5484c",
+    "00089cb739bf4b768b118fd16da0034b",
+    "00096aa8bdb64803b0177214ee265f1b",
+    "0009af0aee79418db00b847e2a0b99b1",
+    "000a588a90fd42ed9bc11872f4e99eec",
+    "000b38ba0cc84fd1a9215a7febcde514"
+  ],
+  "parameters": {
+    "input_view_idx": 0,
+    "n_samples": 4,
+    "ddim_steps": 50,
+    "guidance_scale": 3.0
+  },
+  "objects": {
+    "0000d20857dd4651a0bd73a62d6fe155": {
+      "object_id": "0000d20857dd4651a0bd73a62d6fe155",
+      "input_view": 0,
+      "input_image": "/cluster/51/ecekarasu/views_release/0000d20857dd4651a0bd73a62d6fe155/000.png",
+      "total_views": 12,
+      "target_views": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "generated_views": [
+        {
+          "target_idx": 1,
+          "gt_image": "/cluster/51/ecekarasu/views_release/0000d20857dd4651a0bd73a62d6fe155/001.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/0000d20857dd4651a0bd73a62d6fe155/generated_001_sample_00.png",
+            "evaluation_results/batch_evaluation/0000d20857dd4651a0bd73a62d6fe155/generated_001_sample_01.png",
+            "evaluation_results/batch_evaluation/0000d20857dd4651a0bd73a62d6fe155/generated_001_sample_02.png",
+            "evaluation_results/batch_evaluation/0000d20857dd4651a0bd73a62d6fe155/generated_001_sample_03.png"
+          ],
+          "camera_params": {
+            "x": -0.6363675594329834,
+            "y": 0.7713860869407654,
+            "z": 0.0
+          },
+          "generation_time": 6.069169044494629,
+          "metrics": {
+            "PSNR": 20.792884826660156,
+            "SSIM": 0.9400952458381653,
+            "LPIPS": 0.10261540114879608,
+            "FID": 1.71838321685791
+          }
+        },
+        {
+          "target_idx": 2,
+          "gt_image": "/cluster/51/ecekarasu/views_release/0000d20857dd4651a0bd73a62d6fe155/002.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/0000d20857dd4651a0bd73a62d6fe155/generated_002_sample_00.png",
+            "evaluation_results/batch_evaluation/0000d20857dd4651a0bd73a62d6fe155/generated_002_sample_01.png",
+            "evaluation_results/batch_evaluation/0000d20857dd4651a0bd73a62d6fe155/generated_002_sample_02.png",
+            "evaluation_results/batch_evaluation/0000d20857dd4651a0bd73a62d6fe155/generated_002_sample_03.png"
+          ],
+          "camera_params": {
+            "x": 0.8738278150558472,
+            "y": 0.48623546957969666,
+            "z": 0.0
+          },
+          "generation_time": 4.902055025100708,
+          "metrics": {
+            "PSNR": 21.4429874420166,
+            "SSIM": 0.9343159198760986,
+            "LPIPS": 0.11325277388095856,
+            "FID": 1.7869434356689453
+          }
+        },
+        {
+          "target_idx": 3,
+          "gt_image": "/cluster/51/ecekarasu/views_release/0000d20857dd4651a0bd73a62d6fe155/003.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/0000d20857dd4651a0bd73a62d6fe155/generated_003_sample_00.png",
+            "evaluation_results/batch_evaluation/0000d20857dd4651a0bd73a62d6fe155/generated_003_sample_01.png",
+            "evaluation_results/batch_evaluation/0000d20857dd4651a0bd73a62d6fe155/generated_003_sample_02.png",
+            "evaluation_results/batch_evaluation/0000d20857dd4651a0bd73a62d6fe155/generated_003_sample_03.png"
+          ],
+          "camera_params": {
+            "x": 0.5777629613876343,
+            "y": -0.8162046670913696,
+            "z": 0.0
+          },
+          "generation_time": 4.918809175491333,
+          "metrics": {
+            "PSNR": 21.489299774169922,
+            "SSIM": 0.9423447847366333,
+            "LPIPS": 0.08989875018596649,
+            "FID": 1.5929312705993652
+          }
+        },
+        {
+          "target_idx": 4,
+          "gt_image": "/cluster/51/ecekarasu/views_release/0000d20857dd4651a0bd73a62d6fe155/004.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/0000d20857dd4651a0bd73a62d6fe155/generated_004_sample_00.png",
+            "evaluation_results/batch_evaluation/0000d20857dd4651a0bd73a62d6fe155/generated_004_sample_01.png",
+            "evaluation_results/batch_evaluation/0000d20857dd4651a0bd73a62d6fe155/generated_004_sample_02.png",
+            "evaluation_results/batch_evaluation/0000d20857dd4651a0bd73a62d6fe155/generated_004_sample_03.png"
+          ],
+          "camera_params": {
+            "x": -0.7564614415168762,
+            "y": 0.6540381908416748,
+            "z": 0.0
+          },
+          "generation_time": 4.912562370300293,
+          "metrics": {
+            "PSNR": 20.725322723388672,
+            "SSIM": 0.9411932229995728,
+            "LPIPS": 0.09919576346874237,
+            "FID": 1.795780563354492
+          }
+        },
+        {
+          "target_idx": 5,
+          "gt_image": "/cluster/51/ecekarasu/views_release/0000d20857dd4651a0bd73a62d6fe155/005.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/0000d20857dd4651a0bd73a62d6fe155/generated_005_sample_00.png",
+            "evaluation_results/batch_evaluation/0000d20857dd4651a0bd73a62d6fe155/generated_005_sample_01.png",
+            "evaluation_results/batch_evaluation/0000d20857dd4651a0bd73a62d6fe155/generated_005_sample_02.png",
+            "evaluation_results/batch_evaluation/0000d20857dd4651a0bd73a62d6fe155/generated_005_sample_03.png"
+          ],
+          "camera_params": {
+            "x": 0.3130663335323334,
+            "y": -0.9497312903404236,
+            "z": 0.0
+          },
+          "generation_time": 4.919992923736572,
+          "metrics": {
+            "PSNR": 20.130916595458984,
+            "SSIM": 0.932450532913208,
+            "LPIPS": 0.10555446147918701,
+            "FID": 1.2507092475891113
+          }
+        },
+        {
+          "target_idx": 6,
+          "gt_image": "/cluster/51/ecekarasu/views_release/0000d20857dd4651a0bd73a62d6fe155/006.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/0000d20857dd4651a0bd73a62d6fe155/generated_006_sample_00.png",
+            "evaluation_results/batch_evaluation/0000d20857dd4651a0bd73a62d6fe155/generated_006_sample_01.png",
+            "evaluation_results/batch_evaluation/0000d20857dd4651a0bd73a62d6fe155/generated_006_sample_02.png",
+            "evaluation_results/batch_evaluation/0000d20857dd4651a0bd73a62d6fe155/generated_006_sample_03.png"
+          ],
+          "camera_params": {
+            "x": 0.411258339881897,
+            "y": -0.9115188121795654,
+            "z": 0.0
+          },
+          "generation_time": 4.923530578613281,
+          "metrics": {
+            "PSNR": 19.849605560302734,
+            "SSIM": 0.9270381927490234,
+            "LPIPS": 0.11507685482501984,
+            "FID": 1.2588597297668458
+          }
+        }
+      ],
+      "metrics": {
+        "per_view": [
+          {
+            "view": 1,
+            "PSNR": 20.792884826660156,
+            "SSIM": 0.9400952458381653,
+            "LPIPS": 0.10261540114879608,
+            "FID": 1.71838321685791
+          },
+          {
+            "view": 2,
+            "PSNR": 21.4429874420166,
+            "SSIM": 0.9343159198760986,
+            "LPIPS": 0.11325277388095856,
+            "FID": 1.7869434356689453
+          },
+          {
+            "view": 3,
+            "PSNR": 21.489299774169922,
+            "SSIM": 0.9423447847366333,
+            "LPIPS": 0.08989875018596649,
+            "FID": 1.5929312705993652
+          },
+          {
+            "view": 4,
+            "PSNR": 20.725322723388672,
+            "SSIM": 0.9411932229995728,
+            "LPIPS": 0.09919576346874237,
+            "FID": 1.795780563354492
+          },
+          {
+            "view": 5,
+            "PSNR": 20.130916595458984,
+            "SSIM": 0.932450532913208,
+            "LPIPS": 0.10555446147918701,
+            "FID": 1.2507092475891113
+          },
+          {
+            "view": 6,
+            "PSNR": 19.849605560302734,
+            "SSIM": 0.9270381927490234,
+            "LPIPS": 0.11507685482501984,
+            "FID": 1.2588597297668458
+          }
+        ],
+        "summary": {
+          "PSNR": {
+            "mean": 20.738502820332844,
+            "std": 0.6086084024495402,
+            "min": 19.849605560302734,
+            "max": 21.489299774169922
+          },
+          "SSIM": {
+            "mean": 0.9362396498521169,
+            "std": 0.005468106563067845,
+            "min": 0.9270381927490234,
+            "max": 0.9423447847366333
+          },
+          "LPIPS": {
+            "mean": 0.10426566749811172,
+            "std": 0.00850633549601392,
+            "min": 0.08989875018596649,
+            "max": 0.11507685482501984
+          },
+          "FID": {
+            "mean": 1.567267910639445,
+            "std": 0.2306855022706411,
+            "min": 1.2507092475891113,
+            "max": 1.795780563354492
+          },
+          "True_FID": 258.80389579821167
+        }
+      }
+    },
+    "000259fe35324ba796ce6e08b2961e3e": {
+      "object_id": "000259fe35324ba796ce6e08b2961e3e",
+      "input_view": 0,
+      "input_image": "/cluster/51/ecekarasu/views_release/000259fe35324ba796ce6e08b2961e3e/000.png",
+      "total_views": 12,
+      "target_views": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "generated_views": [
+        {
+          "target_idx": 1,
+          "gt_image": "/cluster/51/ecekarasu/views_release/000259fe35324ba796ce6e08b2961e3e/001.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/000259fe35324ba796ce6e08b2961e3e/generated_001_sample_00.png",
+            "evaluation_results/batch_evaluation/000259fe35324ba796ce6e08b2961e3e/generated_001_sample_01.png",
+            "evaluation_results/batch_evaluation/000259fe35324ba796ce6e08b2961e3e/generated_001_sample_02.png",
+            "evaluation_results/batch_evaluation/000259fe35324ba796ce6e08b2961e3e/generated_001_sample_03.png"
+          ],
+          "camera_params": {
+            "x": -0.27735254168510437,
+            "y": 0.9607684016227722,
+            "z": 0.0
+          },
+          "generation_time": 4.9433629512786865,
+          "metrics": {
+            "PSNR": 16.697072982788086,
+            "SSIM": 0.8732985258102417,
+            "LPIPS": 0.17745471000671387,
+            "FID": 1.6326196670532227
+          }
+        },
+        {
+          "target_idx": 2,
+          "gt_image": "/cluster/51/ecekarasu/views_release/000259fe35324ba796ce6e08b2961e3e/002.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/000259fe35324ba796ce6e08b2961e3e/generated_002_sample_00.png",
+            "evaluation_results/batch_evaluation/000259fe35324ba796ce6e08b2961e3e/generated_002_sample_01.png",
+            "evaluation_results/batch_evaluation/000259fe35324ba796ce6e08b2961e3e/generated_002_sample_02.png",
+            "evaluation_results/batch_evaluation/000259fe35324ba796ce6e08b2961e3e/generated_002_sample_03.png"
+          ],
+          "camera_params": {
+            "x": 0.6336497068405151,
+            "y": -0.773620069026947,
+            "z": 0.0
+          },
+          "generation_time": 4.928762197494507,
+          "metrics": {
+            "PSNR": 16.398815155029297,
+            "SSIM": 0.8698703646659851,
+            "LPIPS": 0.15834558010101318,
+            "FID": 1.8000869750976562
+          }
+        },
+        {
+          "target_idx": 3,
+          "gt_image": "/cluster/51/ecekarasu/views_release/000259fe35324ba796ce6e08b2961e3e/003.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/000259fe35324ba796ce6e08b2961e3e/generated_003_sample_00.png",
+            "evaluation_results/batch_evaluation/000259fe35324ba796ce6e08b2961e3e/generated_003_sample_01.png",
+            "evaluation_results/batch_evaluation/000259fe35324ba796ce6e08b2961e3e/generated_003_sample_02.png",
+            "evaluation_results/batch_evaluation/000259fe35324ba796ce6e08b2961e3e/generated_003_sample_03.png"
+          ],
+          "camera_params": {
+            "x": -0.8521828055381775,
+            "y": 0.5232445001602173,
+            "z": 0.0
+          },
+          "generation_time": 4.928727865219116,
+          "metrics": {
+            "PSNR": 18.217666625976562,
+            "SSIM": 0.8750501871109009,
+            "LPIPS": 0.10541984438896179,
+            "FID": 1.258590316772461
+          }
+        },
+        {
+          "target_idx": 4,
+          "gt_image": "/cluster/51/ecekarasu/views_release/000259fe35324ba796ce6e08b2961e3e/004.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/000259fe35324ba796ce6e08b2961e3e/generated_004_sample_00.png",
+            "evaluation_results/batch_evaluation/000259fe35324ba796ce6e08b2961e3e/generated_004_sample_01.png",
+            "evaluation_results/batch_evaluation/000259fe35324ba796ce6e08b2961e3e/generated_004_sample_02.png",
+            "evaluation_results/batch_evaluation/000259fe35324ba796ce6e08b2961e3e/generated_004_sample_03.png"
+          ],
+          "camera_params": {
+            "x": 0.6119767427444458,
+            "y": 0.7908757925033569,
+            "z": 0.0
+          },
+          "generation_time": 4.93587327003479,
+          "metrics": {
+            "PSNR": 16.618122100830078,
+            "SSIM": 0.8717084527015686,
+            "LPIPS": 0.18444108963012695,
+            "FID": 1.6491138458251953
+          }
+        },
+        {
+          "target_idx": 5,
+          "gt_image": "/cluster/51/ecekarasu/views_release/000259fe35324ba796ce6e08b2961e3e/005.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/000259fe35324ba796ce6e08b2961e3e/generated_005_sample_00.png",
+            "evaluation_results/batch_evaluation/000259fe35324ba796ce6e08b2961e3e/generated_005_sample_01.png",
+            "evaluation_results/batch_evaluation/000259fe35324ba796ce6e08b2961e3e/generated_005_sample_02.png",
+            "evaluation_results/batch_evaluation/000259fe35324ba796ce6e08b2961e3e/generated_005_sample_03.png"
+          ],
+          "camera_params": {
+            "x": -0.6522871255874634,
+            "y": 0.7579721212387085,
+            "z": 0.0
+          },
+          "generation_time": 4.9432532787323,
+          "metrics": {
+            "PSNR": 17.22208023071289,
+            "SSIM": 0.8673758506774902,
+            "LPIPS": 0.14691942930221558,
+            "FID": 1.6125543594360352
+          }
+        },
+        {
+          "target_idx": 6,
+          "gt_image": "/cluster/51/ecekarasu/views_release/000259fe35324ba796ce6e08b2961e3e/006.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/000259fe35324ba796ce6e08b2961e3e/generated_006_sample_00.png",
+            "evaluation_results/batch_evaluation/000259fe35324ba796ce6e08b2961e3e/generated_006_sample_01.png",
+            "evaluation_results/batch_evaluation/000259fe35324ba796ce6e08b2961e3e/generated_006_sample_02.png",
+            "evaluation_results/batch_evaluation/000259fe35324ba796ce6e08b2961e3e/generated_006_sample_03.png"
+          ],
+          "camera_params": {
+            "x": -0.7249419689178467,
+            "y": -0.688810408115387,
+            "z": 0.0
+          },
+          "generation_time": 4.963470697402954,
+          "metrics": {
+            "PSNR": 17.2559814453125,
+            "SSIM": 0.8855291604995728,
+            "LPIPS": 0.16075775027275085,
+            "FID": 1.4549259185791015
+          }
+        }
+      ],
+      "metrics": {
+        "per_view": [
+          {
+            "view": 1,
+            "PSNR": 16.697072982788086,
+            "SSIM": 0.8732985258102417,
+            "LPIPS": 0.17745471000671387,
+            "FID": 1.6326196670532227
+          },
+          {
+            "view": 2,
+            "PSNR": 16.398815155029297,
+            "SSIM": 0.8698703646659851,
+            "LPIPS": 0.15834558010101318,
+            "FID": 1.8000869750976562
+          },
+          {
+            "view": 3,
+            "PSNR": 18.217666625976562,
+            "SSIM": 0.8750501871109009,
+            "LPIPS": 0.10541984438896179,
+            "FID": 1.258590316772461
+          },
+          {
+            "view": 4,
+            "PSNR": 16.618122100830078,
+            "SSIM": 0.8717084527015686,
+            "LPIPS": 0.18444108963012695,
+            "FID": 1.6491138458251953
+          },
+          {
+            "view": 5,
+            "PSNR": 17.22208023071289,
+            "SSIM": 0.8673758506774902,
+            "LPIPS": 0.14691942930221558,
+            "FID": 1.6125543594360352
+          },
+          {
+            "view": 6,
+            "PSNR": 17.2559814453125,
+            "SSIM": 0.8855291604995728,
+            "LPIPS": 0.16075775027275085,
+            "FID": 1.4549259185791015
+          }
+        ],
+        "summary": {
+          "PSNR": {
+            "mean": 17.068289756774902,
+            "std": 0.6011926925435318,
+            "min": 16.398815155029297,
+            "max": 18.217666625976562
+          },
+          "SSIM": {
+            "mean": 0.8738054235776266,
+            "std": 0.005780336959420348,
+            "min": 0.8673758506774902,
+            "max": 0.8855291604995728
+          },
+          "LPIPS": {
+            "mean": 0.1555564006169637,
+            "std": 0.025615640787898037,
+            "min": 0.10541984438896179,
+            "max": 0.18444108963012695
+          },
+          "FID": {
+            "mean": 1.5679818471272788,
+            "std": 0.1708433543221898,
+            "min": 1.258590316772461,
+            "max": 1.8000869750976562
+          },
+          "True_FID": 250.3940486366926
+        }
+      }
+    },
+    "000736d4e4094e3fa159b98a3781c9d3": {
+      "object_id": "000736d4e4094e3fa159b98a3781c9d3",
+      "input_view": 0,
+      "input_image": "/cluster/51/ecekarasu/views_release/000736d4e4094e3fa159b98a3781c9d3/000.png",
+      "total_views": 12,
+      "target_views": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "generated_views": [
+        {
+          "target_idx": 1,
+          "gt_image": "/cluster/51/ecekarasu/views_release/000736d4e4094e3fa159b98a3781c9d3/001.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/000736d4e4094e3fa159b98a3781c9d3/generated_001_sample_00.png",
+            "evaluation_results/batch_evaluation/000736d4e4094e3fa159b98a3781c9d3/generated_001_sample_01.png",
+            "evaluation_results/batch_evaluation/000736d4e4094e3fa159b98a3781c9d3/generated_001_sample_02.png",
+            "evaluation_results/batch_evaluation/000736d4e4094e3fa159b98a3781c9d3/generated_001_sample_03.png"
+          ],
+          "camera_params": {
+            "x": 0.6161690950393677,
+            "y": 0.7876138687133789,
+            "z": 0.0
+          },
+          "generation_time": 4.945348739624023,
+          "metrics": {
+            "PSNR": 15.193227767944336,
+            "SSIM": 0.8019143342971802,
+            "LPIPS": 0.21521708369255066,
+            "FID": 1.4705735206604005
+          }
+        },
+        {
+          "target_idx": 2,
+          "gt_image": "/cluster/51/ecekarasu/views_release/000736d4e4094e3fa159b98a3781c9d3/002.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/000736d4e4094e3fa159b98a3781c9d3/generated_002_sample_00.png",
+            "evaluation_results/batch_evaluation/000736d4e4094e3fa159b98a3781c9d3/generated_002_sample_01.png",
+            "evaluation_results/batch_evaluation/000736d4e4094e3fa159b98a3781c9d3/generated_002_sample_02.png",
+            "evaluation_results/batch_evaluation/000736d4e4094e3fa159b98a3781c9d3/generated_002_sample_03.png"
+          ],
+          "camera_params": {
+            "x": 0.7122276425361633,
+            "y": 0.7019485831260681,
+            "z": 0.0
+          },
+          "generation_time": 4.976199150085449,
+          "metrics": {
+            "PSNR": 14.897930145263672,
+            "SSIM": 0.8143457174301147,
+            "LPIPS": 0.13496297597885132,
+            "FID": 1.1074786186218262
+          }
+        },
+        {
+          "target_idx": 3,
+          "gt_image": "/cluster/51/ecekarasu/views_release/000736d4e4094e3fa159b98a3781c9d3/003.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/000736d4e4094e3fa159b98a3781c9d3/generated_003_sample_00.png",
+            "evaluation_results/batch_evaluation/000736d4e4094e3fa159b98a3781c9d3/generated_003_sample_01.png",
+            "evaluation_results/batch_evaluation/000736d4e4094e3fa159b98a3781c9d3/generated_003_sample_02.png",
+            "evaluation_results/batch_evaluation/000736d4e4094e3fa159b98a3781c9d3/generated_003_sample_03.png"
+          ],
+          "camera_params": {
+            "x": -0.9997034668922424,
+            "y": -0.024368608370423317,
+            "z": 0.0
+          },
+          "generation_time": 4.975744962692261,
+          "metrics": {
+            "PSNR": 10.193205833435059,
+            "SSIM": 0.6650983691215515,
+            "LPIPS": 0.34643256664276123,
+            "FID": 1.5858683586120605
+          }
+        },
+        {
+          "target_idx": 4,
+          "gt_image": "/cluster/51/ecekarasu/views_release/000736d4e4094e3fa159b98a3781c9d3/004.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/000736d4e4094e3fa159b98a3781c9d3/generated_004_sample_00.png",
+            "evaluation_results/batch_evaluation/000736d4e4094e3fa159b98a3781c9d3/generated_004_sample_01.png",
+            "evaluation_results/batch_evaluation/000736d4e4094e3fa159b98a3781c9d3/generated_004_sample_02.png",
+            "evaluation_results/batch_evaluation/000736d4e4094e3fa159b98a3781c9d3/generated_004_sample_03.png"
+          ],
+          "camera_params": {
+            "x": 0.9033859968185425,
+            "y": 0.4288283586502075,
+            "z": 0.0
+          },
+          "generation_time": 4.976868152618408,
+          "metrics": {
+            "PSNR": 13.339995384216309,
+            "SSIM": 0.8194556832313538,
+            "LPIPS": 0.1581292748451233,
+            "FID": 1.12452974319458
+          }
+        },
+        {
+          "target_idx": 5,
+          "gt_image": "/cluster/51/ecekarasu/views_release/000736d4e4094e3fa159b98a3781c9d3/005.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/000736d4e4094e3fa159b98a3781c9d3/generated_005_sample_00.png",
+            "evaluation_results/batch_evaluation/000736d4e4094e3fa159b98a3781c9d3/generated_005_sample_01.png",
+            "evaluation_results/batch_evaluation/000736d4e4094e3fa159b98a3781c9d3/generated_005_sample_02.png",
+            "evaluation_results/batch_evaluation/000736d4e4094e3fa159b98a3781c9d3/generated_005_sample_03.png"
+          ],
+          "camera_params": {
+            "x": 0.07665558904409409,
+            "y": 0.9970576763153076,
+            "z": 0.0
+          },
+          "generation_time": 4.982435464859009,
+          "metrics": {
+            "PSNR": 10.881790161132812,
+            "SSIM": 0.7605422735214233,
+            "LPIPS": 0.2559778094291687,
+            "FID": 1.7277999877929688
+          }
+        },
+        {
+          "target_idx": 6,
+          "gt_image": "/cluster/51/ecekarasu/views_release/000736d4e4094e3fa159b98a3781c9d3/006.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/000736d4e4094e3fa159b98a3781c9d3/generated_006_sample_00.png",
+            "evaluation_results/batch_evaluation/000736d4e4094e3fa159b98a3781c9d3/generated_006_sample_01.png",
+            "evaluation_results/batch_evaluation/000736d4e4094e3fa159b98a3781c9d3/generated_006_sample_02.png",
+            "evaluation_results/batch_evaluation/000736d4e4094e3fa159b98a3781c9d3/generated_006_sample_03.png"
+          ],
+          "camera_params": {
+            "x": 0.3638284206390381,
+            "y": -0.9314660429954529,
+            "z": 0.0
+          },
+          "generation_time": 4.9809253215789795,
+          "metrics": {
+            "PSNR": 11.335748672485352,
+            "SSIM": 0.7814397215843201,
+            "LPIPS": 0.22574126720428467,
+            "FID": 1.606832504272461
+          }
+        }
+      ],
+      "metrics": {
+        "per_view": [
+          {
+            "view": 1,
+            "PSNR": 15.193227767944336,
+            "SSIM": 0.8019143342971802,
+            "LPIPS": 0.21521708369255066,
+            "FID": 1.4705735206604005
+          },
+          {
+            "view": 2,
+            "PSNR": 14.897930145263672,
+            "SSIM": 0.8143457174301147,
+            "LPIPS": 0.13496297597885132,
+            "FID": 1.1074786186218262
+          },
+          {
+            "view": 3,
+            "PSNR": 10.193205833435059,
+            "SSIM": 0.6650983691215515,
+            "LPIPS": 0.34643256664276123,
+            "FID": 1.5858683586120605
+          },
+          {
+            "view": 4,
+            "PSNR": 13.339995384216309,
+            "SSIM": 0.8194556832313538,
+            "LPIPS": 0.1581292748451233,
+            "FID": 1.12452974319458
+          },
+          {
+            "view": 5,
+            "PSNR": 10.881790161132812,
+            "SSIM": 0.7605422735214233,
+            "LPIPS": 0.2559778094291687,
+            "FID": 1.7277999877929688
+          },
+          {
+            "view": 6,
+            "PSNR": 11.335748672485352,
+            "SSIM": 0.7814397215843201,
+            "LPIPS": 0.22574126720428467,
+            "FID": 1.606832504272461
+          }
+        ],
+        "summary": {
+          "PSNR": {
+            "mean": 12.640316327412924,
+            "std": 1.9530484108092712,
+            "min": 10.193205833435059,
+            "max": 15.193227767944336
+          },
+          "SSIM": {
+            "mean": 0.773799349864324,
+            "std": 0.05254995974718268,
+            "min": 0.6650983691215515,
+            "max": 0.8194556832313538
+          },
+          "LPIPS": {
+            "mean": 0.22274349629878998,
+            "std": 0.06873809784322393,
+            "min": 0.13496297597885132,
+            "max": 0.34643256664276123
+          },
+          "FID": {
+            "mean": 1.4371804555257162,
+            "std": 0.23906710657661032,
+            "min": 1.1074786186218262,
+            "max": 1.7277999877929688
+          },
+          "True_FID": 215.098510728453
+        }
+      }
+    },
+    "00089a40101d4c1487edf050b94f6008": {
+      "object_id": "00089a40101d4c1487edf050b94f6008",
+      "input_view": 0,
+      "input_image": "/cluster/51/ecekarasu/views_release/00089a40101d4c1487edf050b94f6008/000.png",
+      "total_views": 12,
+      "target_views": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "generated_views": [
+        {
+          "target_idx": 1,
+          "gt_image": "/cluster/51/ecekarasu/views_release/00089a40101d4c1487edf050b94f6008/001.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/00089a40101d4c1487edf050b94f6008/generated_001_sample_00.png",
+            "evaluation_results/batch_evaluation/00089a40101d4c1487edf050b94f6008/generated_001_sample_01.png",
+            "evaluation_results/batch_evaluation/00089a40101d4c1487edf050b94f6008/generated_001_sample_02.png",
+            "evaluation_results/batch_evaluation/00089a40101d4c1487edf050b94f6008/generated_001_sample_03.png"
+          ],
+          "camera_params": {
+            "x": 0.5170454978942871,
+            "y": 0.8559579253196716,
+            "z": 0.0
+          },
+          "generation_time": 4.961050987243652,
+          "metrics": {
+            "PSNR": 11.30114459991455,
+            "SSIM": 0.8324273824691772,
+            "LPIPS": 0.1948392391204834,
+            "FID": 1.1011601448059083
+          }
+        },
+        {
+          "target_idx": 2,
+          "gt_image": "/cluster/51/ecekarasu/views_release/00089a40101d4c1487edf050b94f6008/002.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/00089a40101d4c1487edf050b94f6008/generated_002_sample_00.png",
+            "evaluation_results/batch_evaluation/00089a40101d4c1487edf050b94f6008/generated_002_sample_01.png",
+            "evaluation_results/batch_evaluation/00089a40101d4c1487edf050b94f6008/generated_002_sample_02.png",
+            "evaluation_results/batch_evaluation/00089a40101d4c1487edf050b94f6008/generated_002_sample_03.png"
+          ],
+          "camera_params": {
+            "x": 0.2630770802497864,
+            "y": -0.9647749066352844,
+            "z": 0.0
+          },
+          "generation_time": 4.946948051452637,
+          "metrics": {
+            "PSNR": 12.205934524536133,
+            "SSIM": 0.8562067747116089,
+            "LPIPS": 0.17286643385887146,
+            "FID": 1.3042393684387208
+          }
+        },
+        {
+          "target_idx": 3,
+          "gt_image": "/cluster/51/ecekarasu/views_release/00089a40101d4c1487edf050b94f6008/003.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/00089a40101d4c1487edf050b94f6008/generated_003_sample_00.png",
+            "evaluation_results/batch_evaluation/00089a40101d4c1487edf050b94f6008/generated_003_sample_01.png",
+            "evaluation_results/batch_evaluation/00089a40101d4c1487edf050b94f6008/generated_003_sample_02.png",
+            "evaluation_results/batch_evaluation/00089a40101d4c1487edf050b94f6008/generated_003_sample_03.png"
+          ],
+          "camera_params": {
+            "x": -0.3080901801586151,
+            "y": -0.9513572454452515,
+            "z": 0.0
+          },
+          "generation_time": 4.952415704727173,
+          "metrics": {
+            "PSNR": 8.912854194641113,
+            "SSIM": 0.7767622470855713,
+            "LPIPS": 0.24757838249206543,
+            "FID": 1.6212799072265625
+          }
+        },
+        {
+          "target_idx": 4,
+          "gt_image": "/cluster/51/ecekarasu/views_release/00089a40101d4c1487edf050b94f6008/004.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/00089a40101d4c1487edf050b94f6008/generated_004_sample_00.png",
+            "evaluation_results/batch_evaluation/00089a40101d4c1487edf050b94f6008/generated_004_sample_01.png",
+            "evaluation_results/batch_evaluation/00089a40101d4c1487edf050b94f6008/generated_004_sample_02.png",
+            "evaluation_results/batch_evaluation/00089a40101d4c1487edf050b94f6008/generated_004_sample_03.png"
+          ],
+          "camera_params": {
+            "x": -0.9820190668106079,
+            "y": 0.18878141045570374,
+            "z": 0.0
+          },
+          "generation_time": 4.951049327850342,
+          "metrics": {
+            "PSNR": 12.236835479736328,
+            "SSIM": 0.8487752079963684,
+            "LPIPS": 0.17837876081466675,
+            "FID": 2.03636474609375
+          }
+        },
+        {
+          "target_idx": 5,
+          "gt_image": "/cluster/51/ecekarasu/views_release/00089a40101d4c1487edf050b94f6008/005.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/00089a40101d4c1487edf050b94f6008/generated_005_sample_00.png",
+            "evaluation_results/batch_evaluation/00089a40101d4c1487edf050b94f6008/generated_005_sample_01.png",
+            "evaluation_results/batch_evaluation/00089a40101d4c1487edf050b94f6008/generated_005_sample_02.png",
+            "evaluation_results/batch_evaluation/00089a40101d4c1487edf050b94f6008/generated_005_sample_03.png"
+          ],
+          "camera_params": {
+            "x": -0.2987523674964905,
+            "y": -0.9543306231498718,
+            "z": 0.0
+          },
+          "generation_time": 4.957690954208374,
+          "metrics": {
+            "PSNR": 11.989307403564453,
+            "SSIM": 0.824338436126709,
+            "LPIPS": 0.2055114507675171,
+            "FID": 1.0856462478637696
+          }
+        },
+        {
+          "target_idx": 6,
+          "gt_image": "/cluster/51/ecekarasu/views_release/00089a40101d4c1487edf050b94f6008/006.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/00089a40101d4c1487edf050b94f6008/generated_006_sample_00.png",
+            "evaluation_results/batch_evaluation/00089a40101d4c1487edf050b94f6008/generated_006_sample_01.png",
+            "evaluation_results/batch_evaluation/00089a40101d4c1487edf050b94f6008/generated_006_sample_02.png",
+            "evaluation_results/batch_evaluation/00089a40101d4c1487edf050b94f6008/generated_006_sample_03.png"
+          ],
+          "camera_params": {
+            "x": -0.5625386834144592,
+            "y": 0.8267709612846375,
+            "z": 0.0
+          },
+          "generation_time": 4.961064577102661,
+          "metrics": {
+            "PSNR": 12.062843322753906,
+            "SSIM": 0.8213156461715698,
+            "LPIPS": 0.2103087157011032,
+            "FID": 1.2049500465393066
+          }
+        }
+      ],
+      "metrics": {
+        "per_view": [
+          {
+            "view": 1,
+            "PSNR": 11.30114459991455,
+            "SSIM": 0.8324273824691772,
+            "LPIPS": 0.1948392391204834,
+            "FID": 1.1011601448059083
+          },
+          {
+            "view": 2,
+            "PSNR": 12.205934524536133,
+            "SSIM": 0.8562067747116089,
+            "LPIPS": 0.17286643385887146,
+            "FID": 1.3042393684387208
+          },
+          {
+            "view": 3,
+            "PSNR": 8.912854194641113,
+            "SSIM": 0.7767622470855713,
+            "LPIPS": 0.24757838249206543,
+            "FID": 1.6212799072265625
+          },
+          {
+            "view": 4,
+            "PSNR": 12.236835479736328,
+            "SSIM": 0.8487752079963684,
+            "LPIPS": 0.17837876081466675,
+            "FID": 2.03636474609375
+          },
+          {
+            "view": 5,
+            "PSNR": 11.989307403564453,
+            "SSIM": 0.824338436126709,
+            "LPIPS": 0.2055114507675171,
+            "FID": 1.0856462478637696
+          },
+          {
+            "view": 6,
+            "PSNR": 12.062843322753906,
+            "SSIM": 0.8213156461715698,
+            "LPIPS": 0.2103087157011032,
+            "FID": 1.2049500465393066
+          }
+        ],
+        "summary": {
+          "PSNR": {
+            "mean": 11.451486587524414,
+            "std": 1.1773012924672988,
+            "min": 8.912854194641113,
+            "max": 12.236835479736328
+          },
+          "SSIM": {
+            "mean": 0.8266376157601675,
+            "std": 0.025557424026990763,
+            "min": 0.7767622470855713,
+            "max": 0.8562067747116089
+          },
+          "LPIPS": {
+            "mean": 0.20158049712578455,
+            "std": 0.02454825930978431,
+            "min": 0.17286643385887146,
+            "max": 0.24757838249206543
+          },
+          "FID": {
+            "mean": 1.3922734101613363,
+            "std": 0.33884726394708076,
+            "min": 1.0856462478637696,
+            "max": 2.03636474609375
+          },
+          "True_FID": 217.4573354481969
+        }
+      }
+    },
+    "00089c3928dc45eb8ac5ad2de2f5484c": {
+      "object_id": "00089c3928dc45eb8ac5ad2de2f5484c",
+      "input_view": 0,
+      "input_image": "/cluster/51/ecekarasu/views_release/00089c3928dc45eb8ac5ad2de2f5484c/000.png",
+      "total_views": 12,
+      "target_views": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "generated_views": [
+        {
+          "target_idx": 1,
+          "gt_image": "/cluster/51/ecekarasu/views_release/00089c3928dc45eb8ac5ad2de2f5484c/001.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/00089c3928dc45eb8ac5ad2de2f5484c/generated_001_sample_00.png",
+            "evaluation_results/batch_evaluation/00089c3928dc45eb8ac5ad2de2f5484c/generated_001_sample_01.png",
+            "evaluation_results/batch_evaluation/00089c3928dc45eb8ac5ad2de2f5484c/generated_001_sample_02.png",
+            "evaluation_results/batch_evaluation/00089c3928dc45eb8ac5ad2de2f5484c/generated_001_sample_03.png"
+          ],
+          "camera_params": {
+            "x": -0.31833532452583313,
+            "y": 0.947978138923645,
+            "z": 0.0
+          },
+          "generation_time": 4.96870756149292,
+          "metrics": {
+            "PSNR": 25.588274002075195,
+            "SSIM": 0.977091908454895,
+            "LPIPS": 0.07575052976608276,
+            "FID": 1.7876718521118165
+          }
+        },
+        {
+          "target_idx": 2,
+          "gt_image": "/cluster/51/ecekarasu/views_release/00089c3928dc45eb8ac5ad2de2f5484c/002.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/00089c3928dc45eb8ac5ad2de2f5484c/generated_002_sample_00.png",
+            "evaluation_results/batch_evaluation/00089c3928dc45eb8ac5ad2de2f5484c/generated_002_sample_01.png",
+            "evaluation_results/batch_evaluation/00089c3928dc45eb8ac5ad2de2f5484c/generated_002_sample_02.png",
+            "evaluation_results/batch_evaluation/00089c3928dc45eb8ac5ad2de2f5484c/generated_002_sample_03.png"
+          ],
+          "camera_params": {
+            "x": 0.9993411302566528,
+            "y": -0.03629487007856369,
+            "z": 0.0
+          },
+          "generation_time": 4.951513051986694,
+          "metrics": {
+            "PSNR": 27.674341201782227,
+            "SSIM": 0.9827268123626709,
+            "LPIPS": 0.06422723829746246,
+            "FID": 1.7574476242065429
+          }
+        },
+        {
+          "target_idx": 3,
+          "gt_image": "/cluster/51/ecekarasu/views_release/00089c3928dc45eb8ac5ad2de2f5484c/003.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/00089c3928dc45eb8ac5ad2de2f5484c/generated_003_sample_00.png",
+            "evaluation_results/batch_evaluation/00089c3928dc45eb8ac5ad2de2f5484c/generated_003_sample_01.png",
+            "evaluation_results/batch_evaluation/00089c3928dc45eb8ac5ad2de2f5484c/generated_003_sample_02.png",
+            "evaluation_results/batch_evaluation/00089c3928dc45eb8ac5ad2de2f5484c/generated_003_sample_03.png"
+          ],
+          "camera_params": {
+            "x": 0.04214642196893692,
+            "y": 0.9991114735603333,
+            "z": 0.0
+          },
+          "generation_time": 5.029199123382568,
+          "metrics": {
+            "PSNR": 27.982852935791016,
+            "SSIM": 0.9839242100715637,
+            "LPIPS": 0.06068626791238785,
+            "FID": 1.7475948333740234
+          }
+        },
+        {
+          "target_idx": 4,
+          "gt_image": "/cluster/51/ecekarasu/views_release/00089c3928dc45eb8ac5ad2de2f5484c/004.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/00089c3928dc45eb8ac5ad2de2f5484c/generated_004_sample_00.png",
+            "evaluation_results/batch_evaluation/00089c3928dc45eb8ac5ad2de2f5484c/generated_004_sample_01.png",
+            "evaluation_results/batch_evaluation/00089c3928dc45eb8ac5ad2de2f5484c/generated_004_sample_02.png",
+            "evaluation_results/batch_evaluation/00089c3928dc45eb8ac5ad2de2f5484c/generated_004_sample_03.png"
+          ],
+          "camera_params": {
+            "x": -0.8089480996131897,
+            "y": -0.5878801345825195,
+            "z": 0.0
+          },
+          "generation_time": 4.95928692817688,
+          "metrics": {
+            "PSNR": 3.2906482219696045,
+            "SSIM": 0.4850519597530365,
+            "LPIPS": 0.37969255447387695,
+            "FID": 1.8390811920166015
+          }
+        },
+        {
+          "target_idx": 5,
+          "gt_image": "/cluster/51/ecekarasu/views_release/00089c3928dc45eb8ac5ad2de2f5484c/005.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/00089c3928dc45eb8ac5ad2de2f5484c/generated_005_sample_00.png",
+            "evaluation_results/batch_evaluation/00089c3928dc45eb8ac5ad2de2f5484c/generated_005_sample_01.png",
+            "evaluation_results/batch_evaluation/00089c3928dc45eb8ac5ad2de2f5484c/generated_005_sample_02.png",
+            "evaluation_results/batch_evaluation/00089c3928dc45eb8ac5ad2de2f5484c/generated_005_sample_03.png"
+          ],
+          "camera_params": {
+            "x": 0.035338394343853,
+            "y": 0.9993755221366882,
+            "z": 0.0
+          },
+          "generation_time": 4.959384918212891,
+          "metrics": {
+            "PSNR": 26.456405639648438,
+            "SSIM": 0.9797159433364868,
+            "LPIPS": 0.06821835786104202,
+            "FID": 1.7417566299438476
+          }
+        },
+        {
+          "target_idx": 6,
+          "gt_image": "/cluster/51/ecekarasu/views_release/00089c3928dc45eb8ac5ad2de2f5484c/006.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/00089c3928dc45eb8ac5ad2de2f5484c/generated_006_sample_00.png",
+            "evaluation_results/batch_evaluation/00089c3928dc45eb8ac5ad2de2f5484c/generated_006_sample_01.png",
+            "evaluation_results/batch_evaluation/00089c3928dc45eb8ac5ad2de2f5484c/generated_006_sample_02.png",
+            "evaluation_results/batch_evaluation/00089c3928dc45eb8ac5ad2de2f5484c/generated_006_sample_03.png"
+          ],
+          "camera_params": {
+            "x": 0.6604932546615601,
+            "y": 0.7508319616317749,
+            "z": 0.0
+          },
+          "generation_time": 4.973647832870483,
+          "metrics": {
+            "PSNR": 30.804855346679688,
+            "SSIM": 0.9877775311470032,
+            "LPIPS": 0.03738263621926308,
+            "FID": 1.01522855758667
+          }
+        }
+      ],
+      "metrics": {
+        "per_view": [
+          {
+            "view": 1,
+            "PSNR": 25.588274002075195,
+            "SSIM": 0.977091908454895,
+            "LPIPS": 0.07575052976608276,
+            "FID": 1.7876718521118165
+          },
+          {
+            "view": 2,
+            "PSNR": 27.674341201782227,
+            "SSIM": 0.9827268123626709,
+            "LPIPS": 0.06422723829746246,
+            "FID": 1.7574476242065429
+          },
+          {
+            "view": 3,
+            "PSNR": 27.982852935791016,
+            "SSIM": 0.9839242100715637,
+            "LPIPS": 0.06068626791238785,
+            "FID": 1.7475948333740234
+          },
+          {
+            "view": 4,
+            "PSNR": 3.2906482219696045,
+            "SSIM": 0.4850519597530365,
+            "LPIPS": 0.37969255447387695,
+            "FID": 1.8390811920166015
+          },
+          {
+            "view": 5,
+            "PSNR": 26.456405639648438,
+            "SSIM": 0.9797159433364868,
+            "LPIPS": 0.06821835786104202,
+            "FID": 1.7417566299438476
+          },
+          {
+            "view": 6,
+            "PSNR": 30.804855346679688,
+            "SSIM": 0.9877775311470032,
+            "LPIPS": 0.03738263621926308,
+            "FID": 1.01522855758667
+          }
+        ],
+        "summary": {
+          "PSNR": {
+            "mean": 23.632896224657696,
+            "std": 9.240266590775764,
+            "min": 3.2906482219696045,
+            "max": 30.804855346679688
+          },
+          "SSIM": {
+            "mean": 0.8993813941876093,
+            "std": 0.18532371117013083,
+            "min": 0.4850519597530365,
+            "max": 0.9877775311470032
+          },
+          "LPIPS": {
+            "mean": 0.11432626408835252,
+            "std": 0.11926216067467639,
+            "min": 0.03738263621926308,
+            "max": 0.37969255447387695
+          },
+          "FID": {
+            "mean": 1.6481301148732503,
+            "std": 0.2849292496705919,
+            "min": 1.01522855758667,
+            "max": 1.8390811920166015
+          },
+          "True_FID": 273.56687286764
+        }
+      }
+    },
+    "00089cb739bf4b768b118fd16da0034b": {
+      "object_id": "00089cb739bf4b768b118fd16da0034b",
+      "input_view": 0,
+      "input_image": "/cluster/51/ecekarasu/views_release/00089cb739bf4b768b118fd16da0034b/000.png",
+      "total_views": 12,
+      "target_views": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "generated_views": [
+        {
+          "target_idx": 1,
+          "gt_image": "/cluster/51/ecekarasu/views_release/00089cb739bf4b768b118fd16da0034b/001.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/00089cb739bf4b768b118fd16da0034b/generated_001_sample_00.png",
+            "evaluation_results/batch_evaluation/00089cb739bf4b768b118fd16da0034b/generated_001_sample_01.png",
+            "evaluation_results/batch_evaluation/00089cb739bf4b768b118fd16da0034b/generated_001_sample_02.png",
+            "evaluation_results/batch_evaluation/00089cb739bf4b768b118fd16da0034b/generated_001_sample_03.png"
+          ],
+          "camera_params": {
+            "x": -0.9212958216667175,
+            "y": -0.3888622522354126,
+            "z": 0.0
+          },
+          "generation_time": 4.974926471710205,
+          "metrics": {
+            "PSNR": 6.777142524719238,
+            "SSIM": 0.6032688617706299,
+            "LPIPS": 0.3294181227684021,
+            "FID": 1.6774652481079102
+          }
+        },
+        {
+          "target_idx": 2,
+          "gt_image": "/cluster/51/ecekarasu/views_release/00089cb739bf4b768b118fd16da0034b/002.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/00089cb739bf4b768b118fd16da0034b/generated_002_sample_00.png",
+            "evaluation_results/batch_evaluation/00089cb739bf4b768b118fd16da0034b/generated_002_sample_01.png",
+            "evaluation_results/batch_evaluation/00089cb739bf4b768b118fd16da0034b/generated_002_sample_02.png",
+            "evaluation_results/batch_evaluation/00089cb739bf4b768b118fd16da0034b/generated_002_sample_03.png"
+          ],
+          "camera_params": {
+            "x": 0.09841857105493546,
+            "y": 0.9951452016830444,
+            "z": 0.0
+          },
+          "generation_time": 4.950432777404785,
+          "metrics": {
+            "PSNR": 14.979538917541504,
+            "SSIM": 0.7867001891136169,
+            "LPIPS": 0.21781738102436066,
+            "FID": 1.6796615600585938
+          }
+        },
+        {
+          "target_idx": 3,
+          "gt_image": "/cluster/51/ecekarasu/views_release/00089cb739bf4b768b118fd16da0034b/003.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/00089cb739bf4b768b118fd16da0034b/generated_003_sample_00.png",
+            "evaluation_results/batch_evaluation/00089cb739bf4b768b118fd16da0034b/generated_003_sample_01.png",
+            "evaluation_results/batch_evaluation/00089cb739bf4b768b118fd16da0034b/generated_003_sample_02.png",
+            "evaluation_results/batch_evaluation/00089cb739bf4b768b118fd16da0034b/generated_003_sample_03.png"
+          ],
+          "camera_params": {
+            "x": 0.9970085024833679,
+            "y": 0.07729165256023407,
+            "z": 0.0
+          },
+          "generation_time": 4.959880828857422,
+          "metrics": {
+            "PSNR": 11.94710922241211,
+            "SSIM": 0.664945662021637,
+            "LPIPS": 0.3240879476070404,
+            "FID": 1.8452865600585937
+          }
+        },
+        {
+          "target_idx": 4,
+          "gt_image": "/cluster/51/ecekarasu/views_release/00089cb739bf4b768b118fd16da0034b/004.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/00089cb739bf4b768b118fd16da0034b/generated_004_sample_00.png",
+            "evaluation_results/batch_evaluation/00089cb739bf4b768b118fd16da0034b/generated_004_sample_01.png",
+            "evaluation_results/batch_evaluation/00089cb739bf4b768b118fd16da0034b/generated_004_sample_02.png",
+            "evaluation_results/batch_evaluation/00089cb739bf4b768b118fd16da0034b/generated_004_sample_03.png"
+          ],
+          "camera_params": {
+            "x": 0.5559840798377991,
+            "y": 0.8311929106712341,
+            "z": 0.0
+          },
+          "generation_time": 4.953671932220459,
+          "metrics": {
+            "PSNR": 9.85580825805664,
+            "SSIM": 0.6921752691268921,
+            "LPIPS": 0.3034776747226715,
+            "FID": 1.671092414855957
+          }
+        },
+        {
+          "target_idx": 5,
+          "gt_image": "/cluster/51/ecekarasu/views_release/00089cb739bf4b768b118fd16da0034b/005.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/00089cb739bf4b768b118fd16da0034b/generated_005_sample_00.png",
+            "evaluation_results/batch_evaluation/00089cb739bf4b768b118fd16da0034b/generated_005_sample_01.png",
+            "evaluation_results/batch_evaluation/00089cb739bf4b768b118fd16da0034b/generated_005_sample_02.png",
+            "evaluation_results/batch_evaluation/00089cb739bf4b768b118fd16da0034b/generated_005_sample_03.png"
+          ],
+          "camera_params": {
+            "x": 0.24459560215473175,
+            "y": -0.9696252942085266,
+            "z": 0.0
+          },
+          "generation_time": 4.960736274719238,
+          "metrics": {
+            "PSNR": 11.199097633361816,
+            "SSIM": 0.7138108015060425,
+            "LPIPS": 0.28545233607292175,
+            "FID": 1.4710660934448243
+          }
+        },
+        {
+          "target_idx": 6,
+          "gt_image": "/cluster/51/ecekarasu/views_release/00089cb739bf4b768b118fd16da0034b/006.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/00089cb739bf4b768b118fd16da0034b/generated_006_sample_00.png",
+            "evaluation_results/batch_evaluation/00089cb739bf4b768b118fd16da0034b/generated_006_sample_01.png",
+            "evaluation_results/batch_evaluation/00089cb739bf4b768b118fd16da0034b/generated_006_sample_02.png",
+            "evaluation_results/batch_evaluation/00089cb739bf4b768b118fd16da0034b/generated_006_sample_03.png"
+          ],
+          "camera_params": {
+            "x": 0.0059441011399030685,
+            "y": -0.9999824166297913,
+            "z": 0.0
+          },
+          "generation_time": 4.957324028015137,
+          "metrics": {
+            "PSNR": 13.079153060913086,
+            "SSIM": 0.7170710563659668,
+            "LPIPS": 0.3504413962364197,
+            "FID": 1.5855634689331055
+          }
+        }
+      ],
+      "metrics": {
+        "per_view": [
+          {
+            "view": 1,
+            "PSNR": 6.777142524719238,
+            "SSIM": 0.6032688617706299,
+            "LPIPS": 0.3294181227684021,
+            "FID": 1.6774652481079102
+          },
+          {
+            "view": 2,
+            "PSNR": 14.979538917541504,
+            "SSIM": 0.7867001891136169,
+            "LPIPS": 0.21781738102436066,
+            "FID": 1.6796615600585938
+          },
+          {
+            "view": 3,
+            "PSNR": 11.94710922241211,
+            "SSIM": 0.664945662021637,
+            "LPIPS": 0.3240879476070404,
+            "FID": 1.8452865600585937
+          },
+          {
+            "view": 4,
+            "PSNR": 9.85580825805664,
+            "SSIM": 0.6921752691268921,
+            "LPIPS": 0.3034776747226715,
+            "FID": 1.671092414855957
+          },
+          {
+            "view": 5,
+            "PSNR": 11.199097633361816,
+            "SSIM": 0.7138108015060425,
+            "LPIPS": 0.28545233607292175,
+            "FID": 1.4710660934448243
+          },
+          {
+            "view": 6,
+            "PSNR": 13.079153060913086,
+            "SSIM": 0.7170710563659668,
+            "LPIPS": 0.3504413962364197,
+            "FID": 1.5855634689331055
+          }
+        ],
+        "summary": {
+          "PSNR": {
+            "mean": 11.306308269500732,
+            "std": 2.5714786491044017,
+            "min": 6.777142524719238,
+            "max": 14.979538917541504
+          },
+          "SSIM": {
+            "mean": 0.6963286399841309,
+            "std": 0.055625466016500195,
+            "min": 0.6032688617706299,
+            "max": 0.7867001891136169
+          },
+          "LPIPS": {
+            "mean": 0.3017824764053027,
+            "std": 0.04271736160998646,
+            "min": 0.21781738102436066,
+            "max": 0.3504413962364197
+          },
+          "FID": {
+            "mean": 1.6550225575764974,
+            "std": 0.1127193649778725,
+            "min": 1.4710660934448243,
+            "max": 1.8452865600585937
+          },
+          "True_FID": 265.46183365409263
+        }
+      }
+    },
+    "00096aa8bdb64803b0177214ee265f1b": {
+      "object_id": "00096aa8bdb64803b0177214ee265f1b",
+      "input_view": 0,
+      "input_image": "/cluster/51/ecekarasu/views_release/00096aa8bdb64803b0177214ee265f1b/000.png",
+      "total_views": 12,
+      "target_views": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "generated_views": [
+        {
+          "target_idx": 1,
+          "gt_image": "/cluster/51/ecekarasu/views_release/00096aa8bdb64803b0177214ee265f1b/001.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/00096aa8bdb64803b0177214ee265f1b/generated_001_sample_00.png",
+            "evaluation_results/batch_evaluation/00096aa8bdb64803b0177214ee265f1b/generated_001_sample_01.png",
+            "evaluation_results/batch_evaluation/00096aa8bdb64803b0177214ee265f1b/generated_001_sample_02.png",
+            "evaluation_results/batch_evaluation/00096aa8bdb64803b0177214ee265f1b/generated_001_sample_03.png"
+          ],
+          "camera_params": {
+            "x": -0.114345483481884,
+            "y": 0.9934411644935608,
+            "z": 0.0
+          },
+          "generation_time": 4.969374179840088,
+          "metrics": {
+            "PSNR": 22.08070945739746,
+            "SSIM": 0.8531955480575562,
+            "LPIPS": 0.17733919620513916,
+            "FID": 1.315987777709961
+          }
+        },
+        {
+          "target_idx": 2,
+          "gt_image": "/cluster/51/ecekarasu/views_release/00096aa8bdb64803b0177214ee265f1b/002.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/00096aa8bdb64803b0177214ee265f1b/generated_002_sample_00.png",
+            "evaluation_results/batch_evaluation/00096aa8bdb64803b0177214ee265f1b/generated_002_sample_01.png",
+            "evaluation_results/batch_evaluation/00096aa8bdb64803b0177214ee265f1b/generated_002_sample_02.png",
+            "evaluation_results/batch_evaluation/00096aa8bdb64803b0177214ee265f1b/generated_002_sample_03.png"
+          ],
+          "camera_params": {
+            "x": 0.6873533129692078,
+            "y": 0.7263232469558716,
+            "z": 0.0
+          },
+          "generation_time": 4.967034101486206,
+          "metrics": {
+            "PSNR": 20.335994720458984,
+            "SSIM": 0.8711680173873901,
+            "LPIPS": 0.16821527481079102,
+            "FID": 1.8077905654907227
+          }
+        },
+        {
+          "target_idx": 3,
+          "gt_image": "/cluster/51/ecekarasu/views_release/00096aa8bdb64803b0177214ee265f1b/003.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/00096aa8bdb64803b0177214ee265f1b/generated_003_sample_00.png",
+            "evaluation_results/batch_evaluation/00096aa8bdb64803b0177214ee265f1b/generated_003_sample_01.png",
+            "evaluation_results/batch_evaluation/00096aa8bdb64803b0177214ee265f1b/generated_003_sample_02.png",
+            "evaluation_results/batch_evaluation/00096aa8bdb64803b0177214ee265f1b/generated_003_sample_03.png"
+          ],
+          "camera_params": {
+            "x": 0.8367400169372559,
+            "y": -0.5476004481315613,
+            "z": 0.0
+          },
+          "generation_time": 4.959045171737671,
+          "metrics": {
+            "PSNR": 18.039993286132812,
+            "SSIM": 0.8609939813613892,
+            "LPIPS": 0.1695886105298996,
+            "FID": 2.0603382110595705
+          }
+        },
+        {
+          "target_idx": 4,
+          "gt_image": "/cluster/51/ecekarasu/views_release/00096aa8bdb64803b0177214ee265f1b/004.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/00096aa8bdb64803b0177214ee265f1b/generated_004_sample_00.png",
+            "evaluation_results/batch_evaluation/00096aa8bdb64803b0177214ee265f1b/generated_004_sample_01.png",
+            "evaluation_results/batch_evaluation/00096aa8bdb64803b0177214ee265f1b/generated_004_sample_02.png",
+            "evaluation_results/batch_evaluation/00096aa8bdb64803b0177214ee265f1b/generated_004_sample_03.png"
+          ],
+          "camera_params": {
+            "x": 0.8061524629592896,
+            "y": 0.5917079448699951,
+            "z": 0.0
+          },
+          "generation_time": 4.97169041633606,
+          "metrics": {
+            "PSNR": 17.94316864013672,
+            "SSIM": 0.8439821004867554,
+            "LPIPS": 0.1800687164068222,
+            "FID": 1.783827018737793
+          }
+        },
+        {
+          "target_idx": 5,
+          "gt_image": "/cluster/51/ecekarasu/views_release/00096aa8bdb64803b0177214ee265f1b/005.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/00096aa8bdb64803b0177214ee265f1b/generated_005_sample_00.png",
+            "evaluation_results/batch_evaluation/00096aa8bdb64803b0177214ee265f1b/generated_005_sample_01.png",
+            "evaluation_results/batch_evaluation/00096aa8bdb64803b0177214ee265f1b/generated_005_sample_02.png",
+            "evaluation_results/batch_evaluation/00096aa8bdb64803b0177214ee265f1b/generated_005_sample_03.png"
+          ],
+          "camera_params": {
+            "x": -0.5390475392341614,
+            "y": 0.8422753810882568,
+            "z": 0.0
+          },
+          "generation_time": 4.960299968719482,
+          "metrics": {
+            "PSNR": 21.899707794189453,
+            "SSIM": 0.8688519597053528,
+            "LPIPS": 0.1654512733221054,
+            "FID": 1.4967265129089355
+          }
+        },
+        {
+          "target_idx": 6,
+          "gt_image": "/cluster/51/ecekarasu/views_release/00096aa8bdb64803b0177214ee265f1b/006.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/00096aa8bdb64803b0177214ee265f1b/generated_006_sample_00.png",
+            "evaluation_results/batch_evaluation/00096aa8bdb64803b0177214ee265f1b/generated_006_sample_01.png",
+            "evaluation_results/batch_evaluation/00096aa8bdb64803b0177214ee265f1b/generated_006_sample_02.png",
+            "evaluation_results/batch_evaluation/00096aa8bdb64803b0177214ee265f1b/generated_006_sample_03.png"
+          ],
+          "camera_params": {
+            "x": 0.6194562911987305,
+            "y": -0.7850311398506165,
+            "z": 0.0
+          },
+          "generation_time": 4.969761610031128,
+          "metrics": {
+            "PSNR": 19.599300384521484,
+            "SSIM": 0.8683554530143738,
+            "LPIPS": 0.14637582004070282,
+            "FID": 1.8463130950927735
+          }
+        }
+      ],
+      "metrics": {
+        "per_view": [
+          {
+            "view": 1,
+            "PSNR": 22.08070945739746,
+            "SSIM": 0.8531955480575562,
+            "LPIPS": 0.17733919620513916,
+            "FID": 1.315987777709961
+          },
+          {
+            "view": 2,
+            "PSNR": 20.335994720458984,
+            "SSIM": 0.8711680173873901,
+            "LPIPS": 0.16821527481079102,
+            "FID": 1.8077905654907227
+          },
+          {
+            "view": 3,
+            "PSNR": 18.039993286132812,
+            "SSIM": 0.8609939813613892,
+            "LPIPS": 0.1695886105298996,
+            "FID": 2.0603382110595705
+          },
+          {
+            "view": 4,
+            "PSNR": 17.94316864013672,
+            "SSIM": 0.8439821004867554,
+            "LPIPS": 0.1800687164068222,
+            "FID": 1.783827018737793
+          },
+          {
+            "view": 5,
+            "PSNR": 21.899707794189453,
+            "SSIM": 0.8688519597053528,
+            "LPIPS": 0.1654512733221054,
+            "FID": 1.4967265129089355
+          },
+          {
+            "view": 6,
+            "PSNR": 19.599300384521484,
+            "SSIM": 0.8683554530143738,
+            "LPIPS": 0.14637582004070282,
+            "FID": 1.8463130950927735
+          }
+        ],
+        "summary": {
+          "PSNR": {
+            "mean": 19.983145713806152,
+            "std": 1.6473297252913677,
+            "min": 17.94316864013672,
+            "max": 22.08070945739746
+          },
+          "SSIM": {
+            "mean": 0.8610911766688029,
+            "std": 0.009743485592355423,
+            "min": 0.8439821004867554,
+            "max": 0.8711680173873901
+          },
+          "LPIPS": {
+            "mean": 0.16783981521924338,
+            "std": 0.010873451918419002,
+            "min": 0.14637582004070282,
+            "max": 0.1800687164068222
+          },
+          "FID": {
+            "mean": 1.7184971968332927,
+            "std": 0.24379962500062516,
+            "min": 1.315987777709961,
+            "max": 2.0603382110595705
+          },
+          "True_FID": 307.18344486112613
+        }
+      }
+    },
+    "0009af0aee79418db00b847e2a0b99b1": {
+      "object_id": "0009af0aee79418db00b847e2a0b99b1",
+      "input_view": 0,
+      "input_image": "/cluster/51/ecekarasu/views_release/0009af0aee79418db00b847e2a0b99b1/000.png",
+      "total_views": 12,
+      "target_views": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "generated_views": [
+        {
+          "target_idx": 1,
+          "gt_image": "/cluster/51/ecekarasu/views_release/0009af0aee79418db00b847e2a0b99b1/001.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/0009af0aee79418db00b847e2a0b99b1/generated_001_sample_00.png",
+            "evaluation_results/batch_evaluation/0009af0aee79418db00b847e2a0b99b1/generated_001_sample_01.png",
+            "evaluation_results/batch_evaluation/0009af0aee79418db00b847e2a0b99b1/generated_001_sample_02.png",
+            "evaluation_results/batch_evaluation/0009af0aee79418db00b847e2a0b99b1/generated_001_sample_03.png"
+          ],
+          "camera_params": {
+            "x": -0.989268958568573,
+            "y": -0.14610594511032104,
+            "z": 0.0
+          },
+          "generation_time": 4.96930718421936,
+          "metrics": {
+            "PSNR": 15.121562957763672,
+            "SSIM": 0.862576961517334,
+            "LPIPS": 0.16850173473358154,
+            "FID": 1.7905527114868165
+          }
+        },
+        {
+          "target_idx": 2,
+          "gt_image": "/cluster/51/ecekarasu/views_release/0009af0aee79418db00b847e2a0b99b1/002.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/0009af0aee79418db00b847e2a0b99b1/generated_002_sample_00.png",
+            "evaluation_results/batch_evaluation/0009af0aee79418db00b847e2a0b99b1/generated_002_sample_01.png",
+            "evaluation_results/batch_evaluation/0009af0aee79418db00b847e2a0b99b1/generated_002_sample_02.png",
+            "evaluation_results/batch_evaluation/0009af0aee79418db00b847e2a0b99b1/generated_002_sample_03.png"
+          ],
+          "camera_params": {
+            "x": 0.15455977618694305,
+            "y": 0.9879835247993469,
+            "z": 0.0
+          },
+          "generation_time": 4.950143098831177,
+          "metrics": {
+            "PSNR": 20.47154998779297,
+            "SSIM": 0.9081090688705444,
+            "LPIPS": 0.08768555521965027,
+            "FID": 1.706045150756836
+          }
+        },
+        {
+          "target_idx": 3,
+          "gt_image": "/cluster/51/ecekarasu/views_release/0009af0aee79418db00b847e2a0b99b1/003.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/0009af0aee79418db00b847e2a0b99b1/generated_003_sample_00.png",
+            "evaluation_results/batch_evaluation/0009af0aee79418db00b847e2a0b99b1/generated_003_sample_01.png",
+            "evaluation_results/batch_evaluation/0009af0aee79418db00b847e2a0b99b1/generated_003_sample_02.png",
+            "evaluation_results/batch_evaluation/0009af0aee79418db00b847e2a0b99b1/generated_003_sample_03.png"
+          ],
+          "camera_params": {
+            "x": -0.721143364906311,
+            "y": -0.6927860379219055,
+            "z": 0.0
+          },
+          "generation_time": 4.955915212631226,
+          "metrics": {
+            "PSNR": 14.887262344360352,
+            "SSIM": 0.8877298831939697,
+            "LPIPS": 0.15426179766654968,
+            "FID": 1.786822509765625
+          }
+        },
+        {
+          "target_idx": 4,
+          "gt_image": "/cluster/51/ecekarasu/views_release/0009af0aee79418db00b847e2a0b99b1/004.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/0009af0aee79418db00b847e2a0b99b1/generated_004_sample_00.png",
+            "evaluation_results/batch_evaluation/0009af0aee79418db00b847e2a0b99b1/generated_004_sample_01.png",
+            "evaluation_results/batch_evaluation/0009af0aee79418db00b847e2a0b99b1/generated_004_sample_02.png",
+            "evaluation_results/batch_evaluation/0009af0aee79418db00b847e2a0b99b1/generated_004_sample_03.png"
+          ],
+          "camera_params": {
+            "x": -0.6247422099113464,
+            "y": -0.7808310985565186,
+            "z": 0.0
+          },
+          "generation_time": 4.952073812484741,
+          "metrics": {
+            "PSNR": 12.802163124084473,
+            "SSIM": 0.8130230903625488,
+            "LPIPS": 0.23925842344760895,
+            "FID": 1.441037940979004
+          }
+        },
+        {
+          "target_idx": 5,
+          "gt_image": "/cluster/51/ecekarasu/views_release/0009af0aee79418db00b847e2a0b99b1/005.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/0009af0aee79418db00b847e2a0b99b1/generated_005_sample_00.png",
+            "evaluation_results/batch_evaluation/0009af0aee79418db00b847e2a0b99b1/generated_005_sample_01.png",
+            "evaluation_results/batch_evaluation/0009af0aee79418db00b847e2a0b99b1/generated_005_sample_02.png",
+            "evaluation_results/batch_evaluation/0009af0aee79418db00b847e2a0b99b1/generated_005_sample_03.png"
+          ],
+          "camera_params": {
+            "x": -0.9896448850631714,
+            "y": -0.1435379534959793,
+            "z": 0.0
+          },
+          "generation_time": 4.95745325088501,
+          "metrics": {
+            "PSNR": 14.499825477600098,
+            "SSIM": 0.8834366798400879,
+            "LPIPS": 0.1480269879102707,
+            "FID": 1.6239994049072266
+          }
+        },
+        {
+          "target_idx": 6,
+          "gt_image": "/cluster/51/ecekarasu/views_release/0009af0aee79418db00b847e2a0b99b1/006.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/0009af0aee79418db00b847e2a0b99b1/generated_006_sample_00.png",
+            "evaluation_results/batch_evaluation/0009af0aee79418db00b847e2a0b99b1/generated_006_sample_01.png",
+            "evaluation_results/batch_evaluation/0009af0aee79418db00b847e2a0b99b1/generated_006_sample_02.png",
+            "evaluation_results/batch_evaluation/0009af0aee79418db00b847e2a0b99b1/generated_006_sample_03.png"
+          ],
+          "camera_params": {
+            "x": -0.9973601698875427,
+            "y": 0.07261592894792557,
+            "z": 0.0
+          },
+          "generation_time": 4.959901809692383,
+          "metrics": {
+            "PSNR": 13.071664810180664,
+            "SSIM": 0.8584978580474854,
+            "LPIPS": 0.17586086690425873,
+            "FID": 1.6297956466674806
+          }
+        }
+      ],
+      "metrics": {
+        "per_view": [
+          {
+            "view": 1,
+            "PSNR": 15.121562957763672,
+            "SSIM": 0.862576961517334,
+            "LPIPS": 0.16850173473358154,
+            "FID": 1.7905527114868165
+          },
+          {
+            "view": 2,
+            "PSNR": 20.47154998779297,
+            "SSIM": 0.9081090688705444,
+            "LPIPS": 0.08768555521965027,
+            "FID": 1.706045150756836
+          },
+          {
+            "view": 3,
+            "PSNR": 14.887262344360352,
+            "SSIM": 0.8877298831939697,
+            "LPIPS": 0.15426179766654968,
+            "FID": 1.786822509765625
+          },
+          {
+            "view": 4,
+            "PSNR": 12.802163124084473,
+            "SSIM": 0.8130230903625488,
+            "LPIPS": 0.23925842344760895,
+            "FID": 1.441037940979004
+          },
+          {
+            "view": 5,
+            "PSNR": 14.499825477600098,
+            "SSIM": 0.8834366798400879,
+            "LPIPS": 0.1480269879102707,
+            "FID": 1.6239994049072266
+          },
+          {
+            "view": 6,
+            "PSNR": 13.071664810180664,
+            "SSIM": 0.8584978580474854,
+            "LPIPS": 0.17586086690425873,
+            "FID": 1.6297956466674806
+          }
+        ],
+        "summary": {
+          "PSNR": {
+            "mean": 15.142338116963705,
+            "std": 2.5378115195859747,
+            "min": 12.802163124084473,
+            "max": 20.47154998779297
+          },
+          "SSIM": {
+            "mean": 0.8688955903053284,
+            "std": 0.02992670192982581,
+            "min": 0.8130230903625488,
+            "max": 0.9081090688705444
+          },
+          "LPIPS": {
+            "mean": 0.16226589431365332,
+            "std": 0.044685190548253,
+            "min": 0.08768555521965027,
+            "max": 0.23925842344760895
+          },
+          "FID": {
+            "mean": 1.6630422274271648,
+            "std": 0.1192653299578324,
+            "min": 1.441037940979004,
+            "max": 1.7905527114868165
+          },
+          "True_FID": 286.7056820359231
+        }
+      }
+    },
+    "000a588a90fd42ed9bc11872f4e99eec": {
+      "object_id": "000a588a90fd42ed9bc11872f4e99eec",
+      "input_view": 0,
+      "input_image": "/cluster/51/ecekarasu/views_release/000a588a90fd42ed9bc11872f4e99eec/000.png",
+      "total_views": 12,
+      "target_views": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "generated_views": [
+        {
+          "target_idx": 1,
+          "gt_image": "/cluster/51/ecekarasu/views_release/000a588a90fd42ed9bc11872f4e99eec/001.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/000a588a90fd42ed9bc11872f4e99eec/generated_001_sample_00.png",
+            "evaluation_results/batch_evaluation/000a588a90fd42ed9bc11872f4e99eec/generated_001_sample_01.png",
+            "evaluation_results/batch_evaluation/000a588a90fd42ed9bc11872f4e99eec/generated_001_sample_02.png",
+            "evaluation_results/batch_evaluation/000a588a90fd42ed9bc11872f4e99eec/generated_001_sample_03.png"
+          ],
+          "camera_params": {
+            "x": 0.48895853757858276,
+            "y": 0.8723070621490479,
+            "z": 0.0
+          },
+          "generation_time": 4.9661688804626465,
+          "metrics": {
+            "PSNR": 16.894439697265625,
+            "SSIM": 0.893022894859314,
+            "LPIPS": 0.14757183194160461,
+            "FID": 1.5632628440856933
+          }
+        },
+        {
+          "target_idx": 2,
+          "gt_image": "/cluster/51/ecekarasu/views_release/000a588a90fd42ed9bc11872f4e99eec/002.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/000a588a90fd42ed9bc11872f4e99eec/generated_002_sample_00.png",
+            "evaluation_results/batch_evaluation/000a588a90fd42ed9bc11872f4e99eec/generated_002_sample_01.png",
+            "evaluation_results/batch_evaluation/000a588a90fd42ed9bc11872f4e99eec/generated_002_sample_02.png",
+            "evaluation_results/batch_evaluation/000a588a90fd42ed9bc11872f4e99eec/generated_002_sample_03.png"
+          ],
+          "camera_params": {
+            "x": -0.9418146014213562,
+            "y": 0.33613279461860657,
+            "z": 0.0
+          },
+          "generation_time": 4.951548099517822,
+          "metrics": {
+            "PSNR": 17.192771911621094,
+            "SSIM": 0.9050029516220093,
+            "LPIPS": 0.12666848301887512,
+            "FID": 1.4755456924438477
+          }
+        },
+        {
+          "target_idx": 3,
+          "gt_image": "/cluster/51/ecekarasu/views_release/000a588a90fd42ed9bc11872f4e99eec/003.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/000a588a90fd42ed9bc11872f4e99eec/generated_003_sample_00.png",
+            "evaluation_results/batch_evaluation/000a588a90fd42ed9bc11872f4e99eec/generated_003_sample_01.png",
+            "evaluation_results/batch_evaluation/000a588a90fd42ed9bc11872f4e99eec/generated_003_sample_02.png",
+            "evaluation_results/batch_evaluation/000a588a90fd42ed9bc11872f4e99eec/generated_003_sample_03.png"
+          ],
+          "camera_params": {
+            "x": 0.8775960803031921,
+            "y": 0.4794008433818817,
+            "z": 0.0
+          },
+          "generation_time": 4.956892490386963,
+          "metrics": {
+            "PSNR": 17.679317474365234,
+            "SSIM": 0.9015296697616577,
+            "LPIPS": 0.10226437449455261,
+            "FID": 1.0584572792053222
+          }
+        },
+        {
+          "target_idx": 4,
+          "gt_image": "/cluster/51/ecekarasu/views_release/000a588a90fd42ed9bc11872f4e99eec/004.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/000a588a90fd42ed9bc11872f4e99eec/generated_004_sample_00.png",
+            "evaluation_results/batch_evaluation/000a588a90fd42ed9bc11872f4e99eec/generated_004_sample_01.png",
+            "evaluation_results/batch_evaluation/000a588a90fd42ed9bc11872f4e99eec/generated_004_sample_02.png",
+            "evaluation_results/batch_evaluation/000a588a90fd42ed9bc11872f4e99eec/generated_004_sample_03.png"
+          ],
+          "camera_params": {
+            "x": 0.2057681530714035,
+            "y": 0.9786008596420288,
+            "z": 0.0
+          },
+          "generation_time": 4.955310583114624,
+          "metrics": {
+            "PSNR": 14.396638870239258,
+            "SSIM": 0.87237548828125,
+            "LPIPS": 0.16157765686511993,
+            "FID": 1.4151483535766602
+          }
+        },
+        {
+          "target_idx": 5,
+          "gt_image": "/cluster/51/ecekarasu/views_release/000a588a90fd42ed9bc11872f4e99eec/005.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/000a588a90fd42ed9bc11872f4e99eec/generated_005_sample_00.png",
+            "evaluation_results/batch_evaluation/000a588a90fd42ed9bc11872f4e99eec/generated_005_sample_01.png",
+            "evaluation_results/batch_evaluation/000a588a90fd42ed9bc11872f4e99eec/generated_005_sample_02.png",
+            "evaluation_results/batch_evaluation/000a588a90fd42ed9bc11872f4e99eec/generated_005_sample_03.png"
+          ],
+          "camera_params": {
+            "x": 0.8565649390220642,
+            "y": -0.516039252281189,
+            "z": 0.0
+          },
+          "generation_time": 4.956092834472656,
+          "metrics": {
+            "PSNR": 17.176624298095703,
+            "SSIM": 0.8923759460449219,
+            "LPIPS": 0.17901505529880524,
+            "FID": 1.4277735710144044
+          }
+        },
+        {
+          "target_idx": 6,
+          "gt_image": "/cluster/51/ecekarasu/views_release/000a588a90fd42ed9bc11872f4e99eec/006.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/000a588a90fd42ed9bc11872f4e99eec/generated_006_sample_00.png",
+            "evaluation_results/batch_evaluation/000a588a90fd42ed9bc11872f4e99eec/generated_006_sample_01.png",
+            "evaluation_results/batch_evaluation/000a588a90fd42ed9bc11872f4e99eec/generated_006_sample_02.png",
+            "evaluation_results/batch_evaluation/000a588a90fd42ed9bc11872f4e99eec/generated_006_sample_03.png"
+          ],
+          "camera_params": {
+            "x": 0.950343668460846,
+            "y": 0.31120237708091736,
+            "z": 0.0
+          },
+          "generation_time": 4.975822448730469,
+          "metrics": {
+            "PSNR": 19.199888229370117,
+            "SSIM": 0.9312542080879211,
+            "LPIPS": 0.12891602516174316,
+            "FID": 1.468909740447998
+          }
+        }
+      ],
+      "metrics": {
+        "per_view": [
+          {
+            "view": 1,
+            "PSNR": 16.894439697265625,
+            "SSIM": 0.893022894859314,
+            "LPIPS": 0.14757183194160461,
+            "FID": 1.5632628440856933
+          },
+          {
+            "view": 2,
+            "PSNR": 17.192771911621094,
+            "SSIM": 0.9050029516220093,
+            "LPIPS": 0.12666848301887512,
+            "FID": 1.4755456924438477
+          },
+          {
+            "view": 3,
+            "PSNR": 17.679317474365234,
+            "SSIM": 0.9015296697616577,
+            "LPIPS": 0.10226437449455261,
+            "FID": 1.0584572792053222
+          },
+          {
+            "view": 4,
+            "PSNR": 14.396638870239258,
+            "SSIM": 0.87237548828125,
+            "LPIPS": 0.16157765686511993,
+            "FID": 1.4151483535766602
+          },
+          {
+            "view": 5,
+            "PSNR": 17.176624298095703,
+            "SSIM": 0.8923759460449219,
+            "LPIPS": 0.17901505529880524,
+            "FID": 1.4277735710144044
+          },
+          {
+            "view": 6,
+            "PSNR": 19.199888229370117,
+            "SSIM": 0.9312542080879211,
+            "LPIPS": 0.12891602516174316,
+            "FID": 1.468909740447998
+          }
+        ],
+        "summary": {
+          "PSNR": {
+            "mean": 17.089946746826172,
+            "std": 1.4206469917589095,
+            "min": 14.396638870239258,
+            "max": 19.199888229370117
+          },
+          "SSIM": {
+            "mean": 0.8992601931095123,
+            "std": 0.01765800524246335,
+            "min": 0.87237548828125,
+            "max": 0.9312542080879211
+          },
+          "LPIPS": {
+            "mean": 0.14100223779678345,
+            "std": 0.025045414905135455,
+            "min": 0.10226437449455261,
+            "max": 0.17901505529880524
+          },
+          "FID": {
+            "mean": 1.4015162467956541,
+            "std": 0.16059729148770185,
+            "min": 1.0584572792053222,
+            "max": 1.5632628440856933
+          },
+          "True_FID": 204.17094943087125
+        }
+      }
+    },
+    "000b38ba0cc84fd1a9215a7febcde514": {
+      "object_id": "000b38ba0cc84fd1a9215a7febcde514",
+      "input_view": 0,
+      "input_image": "/cluster/51/ecekarasu/views_release/000b38ba0cc84fd1a9215a7febcde514/000.png",
+      "total_views": 12,
+      "target_views": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "generated_views": [
+        {
+          "target_idx": 1,
+          "gt_image": "/cluster/51/ecekarasu/views_release/000b38ba0cc84fd1a9215a7febcde514/001.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/000b38ba0cc84fd1a9215a7febcde514/generated_001_sample_00.png",
+            "evaluation_results/batch_evaluation/000b38ba0cc84fd1a9215a7febcde514/generated_001_sample_01.png",
+            "evaluation_results/batch_evaluation/000b38ba0cc84fd1a9215a7febcde514/generated_001_sample_02.png",
+            "evaluation_results/batch_evaluation/000b38ba0cc84fd1a9215a7febcde514/generated_001_sample_03.png"
+          ],
+          "camera_params": {
+            "x": 0.9971448183059692,
+            "y": 0.07551299780607224,
+            "z": 0.0
+          },
+          "generation_time": 4.972156524658203,
+          "metrics": {
+            "PSNR": 10.024495124816895,
+            "SSIM": 0.6526186466217041,
+            "LPIPS": 0.30199113488197327,
+            "FID": 1.2127982139587403
+          }
+        },
+        {
+          "target_idx": 2,
+          "gt_image": "/cluster/51/ecekarasu/views_release/000b38ba0cc84fd1a9215a7febcde514/002.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/000b38ba0cc84fd1a9215a7febcde514/generated_002_sample_00.png",
+            "evaluation_results/batch_evaluation/000b38ba0cc84fd1a9215a7febcde514/generated_002_sample_01.png",
+            "evaluation_results/batch_evaluation/000b38ba0cc84fd1a9215a7febcde514/generated_002_sample_02.png",
+            "evaluation_results/batch_evaluation/000b38ba0cc84fd1a9215a7febcde514/generated_002_sample_03.png"
+          ],
+          "camera_params": {
+            "x": 0.28429046273231506,
+            "y": 0.9587382674217224,
+            "z": 0.0
+          },
+          "generation_time": 4.949547529220581,
+          "metrics": {
+            "PSNR": 10.530673027038574,
+            "SSIM": 0.6243269443511963,
+            "LPIPS": 0.3245682418346405,
+            "FID": 1.5834920883178711
+          }
+        },
+        {
+          "target_idx": 3,
+          "gt_image": "/cluster/51/ecekarasu/views_release/000b38ba0cc84fd1a9215a7febcde514/003.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/000b38ba0cc84fd1a9215a7febcde514/generated_003_sample_00.png",
+            "evaluation_results/batch_evaluation/000b38ba0cc84fd1a9215a7febcde514/generated_003_sample_01.png",
+            "evaluation_results/batch_evaluation/000b38ba0cc84fd1a9215a7febcde514/generated_003_sample_02.png",
+            "evaluation_results/batch_evaluation/000b38ba0cc84fd1a9215a7febcde514/generated_003_sample_03.png"
+          ],
+          "camera_params": {
+            "x": -0.5263717174530029,
+            "y": 0.8502547144889832,
+            "z": 0.0
+          },
+          "generation_time": 4.954557180404663,
+          "metrics": {
+            "PSNR": 10.78534984588623,
+            "SSIM": 0.6330532431602478,
+            "LPIPS": 0.3322298228740692,
+            "FID": 1.360952091217041
+          }
+        },
+        {
+          "target_idx": 4,
+          "gt_image": "/cluster/51/ecekarasu/views_release/000b38ba0cc84fd1a9215a7febcde514/004.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/000b38ba0cc84fd1a9215a7febcde514/generated_004_sample_00.png",
+            "evaluation_results/batch_evaluation/000b38ba0cc84fd1a9215a7febcde514/generated_004_sample_01.png",
+            "evaluation_results/batch_evaluation/000b38ba0cc84fd1a9215a7febcde514/generated_004_sample_02.png",
+            "evaluation_results/batch_evaluation/000b38ba0cc84fd1a9215a7febcde514/generated_004_sample_03.png"
+          ],
+          "camera_params": {
+            "x": -0.9478656649589539,
+            "y": -0.3186704218387604,
+            "z": 0.0
+          },
+          "generation_time": 4.951776027679443,
+          "metrics": {
+            "PSNR": 12.65561580657959,
+            "SSIM": 0.7352297306060791,
+            "LPIPS": 0.22903645038604736,
+            "FID": 1.1450109481811523
+          }
+        },
+        {
+          "target_idx": 5,
+          "gt_image": "/cluster/51/ecekarasu/views_release/000b38ba0cc84fd1a9215a7febcde514/005.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/000b38ba0cc84fd1a9215a7febcde514/generated_005_sample_00.png",
+            "evaluation_results/batch_evaluation/000b38ba0cc84fd1a9215a7febcde514/generated_005_sample_01.png",
+            "evaluation_results/batch_evaluation/000b38ba0cc84fd1a9215a7febcde514/generated_005_sample_02.png",
+            "evaluation_results/batch_evaluation/000b38ba0cc84fd1a9215a7febcde514/generated_005_sample_03.png"
+          ],
+          "camera_params": {
+            "x": 0.708183765411377,
+            "y": -0.706028163433075,
+            "z": 0.0
+          },
+          "generation_time": 4.957390069961548,
+          "metrics": {
+            "PSNR": 10.174274444580078,
+            "SSIM": 0.6825578808784485,
+            "LPIPS": 0.296528697013855,
+            "FID": 1.407297706604004
+          }
+        },
+        {
+          "target_idx": 6,
+          "gt_image": "/cluster/51/ecekarasu/views_release/000b38ba0cc84fd1a9215a7febcde514/006.png",
+          "generated_samples": [
+            "evaluation_results/batch_evaluation/000b38ba0cc84fd1a9215a7febcde514/generated_006_sample_00.png",
+            "evaluation_results/batch_evaluation/000b38ba0cc84fd1a9215a7febcde514/generated_006_sample_01.png",
+            "evaluation_results/batch_evaluation/000b38ba0cc84fd1a9215a7febcde514/generated_006_sample_02.png",
+            "evaluation_results/batch_evaluation/000b38ba0cc84fd1a9215a7febcde514/generated_006_sample_03.png"
+          ],
+          "camera_params": {
+            "x": 0.5869258046150208,
+            "y": -0.8096407055854797,
+            "z": 0.0
+          },
+          "generation_time": 4.958099126815796,
+          "metrics": {
+            "PSNR": 9.456445693969727,
+            "SSIM": 0.6090031862258911,
+            "LPIPS": 0.35130739212036133,
+            "FID": 1.6813854217529296
+          }
+        }
+      ],
+      "metrics": {
+        "per_view": [
+          {
+            "view": 1,
+            "PSNR": 10.024495124816895,
+            "SSIM": 0.6526186466217041,
+            "LPIPS": 0.30199113488197327,
+            "FID": 1.2127982139587403
+          },
+          {
+            "view": 2,
+            "PSNR": 10.530673027038574,
+            "SSIM": 0.6243269443511963,
+            "LPIPS": 0.3245682418346405,
+            "FID": 1.5834920883178711
+          },
+          {
+            "view": 3,
+            "PSNR": 10.78534984588623,
+            "SSIM": 0.6330532431602478,
+            "LPIPS": 0.3322298228740692,
+            "FID": 1.360952091217041
+          },
+          {
+            "view": 4,
+            "PSNR": 12.65561580657959,
+            "SSIM": 0.7352297306060791,
+            "LPIPS": 0.22903645038604736,
+            "FID": 1.1450109481811523
+          },
+          {
+            "view": 5,
+            "PSNR": 10.174274444580078,
+            "SSIM": 0.6825578808784485,
+            "LPIPS": 0.296528697013855,
+            "FID": 1.407297706604004
+          },
+          {
+            "view": 6,
+            "PSNR": 9.456445693969727,
+            "SSIM": 0.6090031862258911,
+            "LPIPS": 0.35130739212036133,
+            "FID": 1.6813854217529296
+          }
+        ],
+        "summary": {
+          "PSNR": {
+            "mean": 10.604475657145182,
+            "std": 1.0070386876469475,
+            "min": 9.456445693969727,
+            "max": 12.65561580657959
+          },
+          "SSIM": {
+            "mean": 0.6561316053072611,
+            "std": 0.042293493368969585,
+            "min": 0.6090031862258911,
+            "max": 0.7352297306060791
+          },
+          "LPIPS": {
+            "mean": 0.3059436231851578,
+            "std": 0.03897582257519963,
+            "min": 0.22903645038604736,
+            "max": 0.35130739212036133
+          },
+          "FID": {
+            "mean": 1.3984894116719566,
+            "std": 0.18906583145131375,
+            "min": 1.1450109481811523,
+            "max": 1.6813854217529296
+          },
+          "True_FID": 210.00016655306166
+        }
+      }
+    }
+  },
+  "summary": {
+    "total_objects": 10,
+    "successful_objects": 10,
+    "failed_objects": 0,
+    "overall_metrics": {
+      "PSNR": {
+        "mean": 15.965770622094471,
+        "std": 4.274949490795949,
+        "min": 10.604475657145182,
+        "max": 23.632896224657696
+      },
+      "SSIM": {
+        "mean": 0.8291570638616879,
+        "std": 0.0874968703485948,
+        "min": 0.6561316053072611,
+        "max": 0.9362396498521169
+      },
+      "LPIPS": {
+        "mean": 0.18773063725481431,
+        "std": 0.06709491553236474,
+        "min": 0.10426566749811172,
+        "max": 0.3059436231851578
+      },
+      "FID": {
+        "mean": 1.544940137863159,
+        "std": 0.12033429402357355,
+        "min": 1.3922734101613363,
+        "max": 1.7184971968332927
+      },
+      "True_FID": {
+        "mean": 248.88427400142686,
+        "std": 33.844293741312825,
+        "min": 204.17094943087125,
+        "max": 307.18344486112613
+      }
+    }
+  }
+}

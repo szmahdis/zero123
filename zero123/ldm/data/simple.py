@@ -167,17 +167,25 @@ class NfpDataset(Dataset):
 
 class ObjaverseDataModuleFromConfig(pl.LightningDataModule):
     def __init__(self, root_dir, batch_size, total_view, train=None, validation=None,
-                 test=None, num_workers=4, **kwargs):
+                 test=None, num_workers=4, max_samples=None, **kwargs):
         super().__init__(self)
         self.root_dir = root_dir
         self.batch_size = batch_size
         self.num_workers = num_workers
         self.total_view = total_view
+        self.max_samples = max_samples  # NEW: limit dataset size
 
+        # Store train and validation configs
+        self.train_config = train
+        self.validation_config = validation
+
+        # Get image transforms from either config
         if train is not None:
             dataset_config = train
-        if validation is not None:
+        elif validation is not None:
             dataset_config = validation
+        else:
+            dataset_config = {}
 
         if 'image_transforms' in dataset_config:
             image_transforms = [torchvision.transforms.Resize(dataset_config.image_transforms.size)]
@@ -187,22 +195,52 @@ class ObjaverseDataModuleFromConfig(pl.LightningDataModule):
                                 transforms.Lambda(lambda x: rearrange(x * 2. - 1., 'c h w -> h w c'))])
         self.image_transforms = torchvision.transforms.Compose(image_transforms)
 
-
     def train_dataloader(self):
-        dataset = ObjaverseData(root_dir=self.root_dir, total_view=self.total_view, validation=False, \
-                                image_transforms=self.image_transforms)
+        # Get use_plucker from train config
+        use_plucker = self.train_config.get('use_plucker', False) if self.train_config else False
+        
+        dataset = ObjaverseData(
+            root_dir=self.root_dir, 
+            total_view=self.total_view, 
+            validation=False,
+            use_plucker=use_plucker,  # PASS THE PARAMETER
+            max_samples=self.max_samples,  # PASS MAX SAMPLES
+            image_transforms=self.image_transforms
+        )
         sampler = DistributedSampler(dataset)
         return wds.WebLoader(dataset, batch_size=self.batch_size, num_workers=self.num_workers, shuffle=False, sampler=sampler)
 
     def val_dataloader(self):
-        dataset = ObjaverseData(root_dir=self.root_dir, total_view=self.total_view, validation=True, \
-                                image_transforms=self.image_transforms)
+        # Get use_plucker from validation config
+        use_plucker = self.validation_config.get('use_plucker', False) if self.validation_config else False
+        
+        dataset = ObjaverseData(
+            root_dir=self.root_dir, 
+            total_view=self.total_view, 
+            validation=True,
+            use_plucker=use_plucker,  # PASS THE PARAMETER
+            max_samples=self.max_samples,  # PASS MAX SAMPLES
+            image_transforms=self.image_transforms
+        )
         sampler = DistributedSampler(dataset)
         return wds.WebLoader(dataset, batch_size=self.batch_size, num_workers=self.num_workers, shuffle=False)
     
     def test_dataloader(self):
-        return wds.WebLoader(ObjaverseData(root_dir=self.root_dir, total_view=self.total_view, validation=self.validation),\
-                          batch_size=self.batch_size, num_workers=self.num_workers, shuffle=False)
+        use_plucker = self.validation_config.get('use_plucker', False) if self.validation_config else False
+        
+        return wds.WebLoader(
+            ObjaverseData(
+                root_dir=self.root_dir, 
+                total_view=self.total_view, 
+                validation=True,
+                use_plucker=use_plucker,  # PASS THE PARAMETER
+                max_samples=self.max_samples,  # PASS MAX SAMPLES
+                image_transforms=self.image_transforms
+            ),
+            batch_size=self.batch_size, 
+            num_workers=self.num_workers, 
+            shuffle=False
+        )
 
 
 class ObjaverseData(Dataset):
@@ -214,12 +252,14 @@ class ObjaverseData(Dataset):
         postprocess=None,
         return_paths=False,
         total_view=12,
-        validation=False
-        ) -> None:
-        """Create a dataset from a folder of images.
-        If you pass in a root directory it will be searched for images
-        ending in ext (ext can be a list)
-        """
+        validation=False,
+        use_plucker=False,
+        max_samples=None):  # NEW PARAMETER
+        
+        self.use_plucker = use_plucker
+        self.max_samples = max_samples
+        
+        """Create a dataset from a folder of images."""
         self.root_dir = Path(root_dir)
         self.default_trans = default_trans
         self.return_paths = return_paths
@@ -239,8 +279,16 @@ class ObjaverseData(Dataset):
             self.paths = self.paths[math.floor(total_objects / 100. * 99.):] # used last 1% as validation
         else:
             self.paths = self.paths[:math.floor(total_objects / 100. * 99.)] # used first 99% as training
+        
+        # LIMIT TO max_samples IF SPECIFIED
+        if self.max_samples is not None and self.max_samples > 0:
+            self.paths = self.paths[:self.max_samples]
+            print(f'============= limiting dataset to {self.max_samples} samples =============')
+        
         print('============= length of dataset %d =============' % len(self.paths))
         self.tform = image_transforms
+
+        print(f"ObjaverseData initialized with mode: {'plucker' if self.use_plucker else 'vanilla'}")
 
     def __len__(self):
         return len(self.paths)
@@ -383,8 +431,9 @@ class ObjaverseData(Dataset):
         data["image_cond"] = cond_im
         data["T"] = self.get_T(target_RT, cond_RT)
 
-        ### ADDED BY ME ###
-        data["T_plucker"] = self.get_plucker_coordinates(target_RT, cond_RT)
+        # Conditionally compute Plucker coordinates
+        if self.use_plucker:
+            data["T_plucker"] = self.get_plucker_coordinates(target_RT, cond_RT)
 
         if self.postprocess is not None:
             data = self.postprocess(data)

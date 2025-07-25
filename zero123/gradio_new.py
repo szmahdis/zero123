@@ -30,6 +30,7 @@ from rich import print
 from transformers import AutoFeatureExtractor #, CLIPImageProcessor
 from torch import autocast
 from torchvision import transforms
+from inference_utils import compute_plucker_from_spherical, load_model_with_mode_detection
 
 
 _SHOW_DESC = True
@@ -79,11 +80,25 @@ def sample_model(input_im, model, sampler, precision, h, w, ddim_steps, n_sample
     with precision_scope('cuda'):
         with model.ema_scope():
             c = model.get_learned_conditioning(input_im).tile(n_samples, 1, 1)
+            
+            # Compute 4D spherical coordinates
             T = torch.tensor([math.radians(x), math.sin(
                 math.radians(y)), math.cos(math.radians(y)), z])
             T = T[None, None, :].repeat(n_samples, 1, 1).to(c.device)
-            c = torch.cat([c, T], dim=-1)
+            
+            # Conditionally compute Plucker coordinates
+            if model.use_plucker:
+                T_plucker = compute_plucker_from_spherical(x, y, z)
+                T_plucker = T_plucker[None, None, :].repeat(n_samples, 1, 1).to(c.device)
+                T_combined = torch.cat([T, T_plucker], dim=-1)
+                print(f"Using Plucker mode for inference: {T_combined.shape}")
+            else:
+                T_combined = T
+                print(f"Using vanilla mode for inference: {T_combined.shape}")
+            
+            c = torch.cat([c, T_combined], dim=-1)
             c = model.cc_projection(c)
+            
             cond = {}
             cond['c_crossattn'] = [c]
             cond['c_concat'] = [model.encode_first_stage((input_im.to(c.device))).mode().detach()
@@ -480,10 +495,10 @@ def run_demo(
     device = f'cuda:{device_idx}'
     config = OmegaConf.load(config)
 
-    # Instantiate all models beforehand for efficiency.
+    # Use smart loading that detects the mode
     models = dict()
     print('Instantiating LatentDiffusion...')
-    models['turncam'] = load_model_from_config(config, ckpt, device=device)
+    models['turncam'] = load_model_with_mode_detection(config, ckpt, device=device)
     print('Instantiating Carvekit HiInterface...')
     models['carvekit'] = create_carvekit_interface()
     print('Instantiating StableDiffusionSafetyChecker...')

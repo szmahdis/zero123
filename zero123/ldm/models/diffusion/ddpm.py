@@ -494,10 +494,16 @@ class LatentDiffusion(DDPM):
                  scale_factor=1.0,
                  scale_by_std=False,
                  unet_trainable=True,
+                 use_plucker=False,  # NEW PARAMETER
                  *args, **kwargs):
+        
+        # Store the mode
+        self.use_plucker = use_plucker
+        
         self.num_timesteps_cond = default(num_timesteps_cond, 1)
         self.scale_by_std = scale_by_std
         assert self.num_timesteps_cond <= kwargs['timesteps']
+        
         # for backwards compatibility after implementation of DiffusionWrapper
         if conditioning_key is None:
             conditioning_key = 'concat' if concat_mode else 'crossattn'
@@ -522,13 +528,16 @@ class LatentDiffusion(DDPM):
         self.instantiate_cond_stage(cond_stage_config)
         self.cond_stage_forward = cond_stage_forward
 
-        # construct linear projection layer for concatenating image CLIP embedding and RT
-        # self.cc_projection = nn.Linear(772, 768)
-        ### ADDED BY ME ###
-        self.cc_projection = nn.Linear(778, 768)  # 768 (CLIP) + 4 (spherical) + 6 (plucker) = 778
-        ###
-
-        self.cc_projection = nn.Linear(772, 768)
+        # Dynamically set cc_projection input size based on mode
+        clip_dim = 768
+        spherical_dim = 4
+        plucker_dim = 6 if self.use_plucker else 0
+        total_input_dim = clip_dim + spherical_dim + plucker_dim
+        
+        print(f"Initializing cc_projection with mode: {'plucker' if self.use_plucker else 'vanilla'}")
+        print(f"Input dimensions: CLIP({clip_dim}) + Spherical({spherical_dim}) + Plucker({plucker_dim}) = {total_input_dim}")
+        
+        self.cc_projection = nn.Linear(total_input_dim, 768)
         nn.init.eye_(list(self.cc_projection.parameters())[0][:768, :768])
         nn.init.zeros_(list(self.cc_projection.parameters())[1])
         self.cc_projection.requires_grad_(True)
@@ -540,6 +549,90 @@ class LatentDiffusion(DDPM):
         if ckpt_path is not None:
             self.init_from_ckpt(ckpt_path, ignore_keys)
             self.restarted_from_ckpt = True
+
+    def _detect_checkpoint_mode(self, state_dict):
+        """Detect if checkpoint was trained with vanilla or plucker mode"""
+        cc_weight_key = "cc_projection.weight"
+        if cc_weight_key in state_dict:
+            input_dim = state_dict[cc_weight_key].shape[1]
+            if input_dim == 772:  # 768 + 4
+                return False  # vanilla mode
+            elif input_dim == 778:  # 768 + 4 + 6
+                return True   # plucker mode
+            else:
+                print(f"Warning: Unknown cc_projection input dimension: {input_dim}")
+        return None
+
+    def _handle_mode_mismatch(self, state_dict, checkpoint_mode):
+        """Handle loading checkpoints with different modes"""
+        cc_weight_key = "cc_projection.weight"
+        cc_bias_key = "cc_projection.bias"
+        
+        if cc_weight_key not in state_dict:
+            return state_dict
+            
+        old_weight = state_dict[cc_weight_key]
+        old_bias = state_dict[cc_bias_key]
+        current_weight = self.cc_projection.weight
+        current_bias = self.cc_projection.bias
+        
+        if old_weight.shape == current_weight.shape:
+            # No mismatch, use as is
+            return state_dict
+            
+        print(f"Handling mode mismatch:")
+        print(f"  Checkpoint mode: {'plucker' if checkpoint_mode else 'vanilla'}")
+        print(f"  Current mode: {'plucker' if self.use_plucker else 'vanilla'}")
+        print(f"  Old weight shape: {old_weight.shape}")
+        print(f"  New weight shape: {current_weight.shape}")
+        
+        # Initialize new weights
+        new_weight = torch.zeros_like(current_weight)
+        new_bias = torch.zeros_like(current_bias)
+        
+        # Copy the CLIP + spherical part (first 772 dimensions)
+        clip_spherical_dim = 772
+        copy_dim = min(old_weight.shape[1], current_weight.shape[1], clip_spherical_dim)
+        new_weight[:, :copy_dim] = old_weight[:, :copy_dim]
+        new_bias[:] = old_bias[:]
+        
+        # If current model uses plucker but checkpoint doesn't, initialize plucker weights
+        if self.use_plucker and not checkpoint_mode:
+            print("  Initializing Plucker coordinate weights with small random values")
+            plucker_start = 772
+            new_weight[:, plucker_start:] = torch.randn(768, 6) * 0.01
+        
+        # If checkpoint uses plucker but current model doesn't, we just ignore the plucker part
+        # (already handled by copy_dim calculation)
+        
+        state_dict[cc_weight_key] = new_weight
+        state_dict[cc_bias_key] = new_bias
+        
+        return state_dict
+
+    def init_from_ckpt(self, path, ignore_keys=list(), only_model=False):
+        sd = torch.load(path, map_location="cpu")
+        if "state_dict" in list(sd.keys()):
+            sd = sd["state_dict"]
+        
+        # Detect checkpoint mode and handle mismatches
+        checkpoint_mode = self._detect_checkpoint_mode(sd)
+        if checkpoint_mode is not None:
+            sd = self._handle_mode_mismatch(sd, checkpoint_mode)
+        
+        keys = list(sd.keys())
+        for k in keys:
+            for ik in ignore_keys:
+                if k.startswith(ik):
+                    print("Deleting key {} from state_dict.".format(k))
+                    del sd[k]
+        missing, unexpected = self.load_state_dict(sd, strict=False) if not only_model else self.model.load_state_dict(
+            sd, strict=False)
+        print(f"Restored from {path} with {len(missing)} missing and {len(unexpected)} unexpected keys")
+        if len(missing) > 0:
+            print(f"Missing Keys: {missing}")
+        if len(unexpected) > 0:
+            print(f"Unexpected Keys: {unexpected}")
 
     def make_cond_schedule(self, ):
         self.cond_ids = torch.full(size=(self.num_timesteps,), fill_value=self.num_timesteps - 1, dtype=torch.long)
@@ -754,19 +847,21 @@ class LatentDiffusion(DDPM):
         with torch.enable_grad():
             clip_emb = self.get_learned_conditioning(xc).detach()
             null_prompt = self.get_learned_conditioning([""]).detach()
-            # cond["c_crossattn"] = [self.cc_projection(torch.cat([torch.where(prompt_mask, null_prompt, clip_emb), T[:, None, :]], dim=-1))]
-        
-            ### ADDED BY ME ###
-            # get plucker coordinates from batch
-            T_plucker = batch['T_plucker'].to(memory_format=torch.contiguous_format).float()
-            if bs is not None:
-                T_plucker = T_plucker[:bs].to(self.device)
-
-            # combine 4d spherical coordinates with 6d plucker coordinates
-            T_combined = torch.cat([T, T_plucker], dim=-1)  # [batch, 10]
+            
+            # Prepare coordinate conditioning based on mode
+            if self.use_plucker:
+                # Use both spherical and Plucker coordinates
+                T_plucker = batch['T_plucker'].to(memory_format=torch.contiguous_format).float()
+                if bs is not None:
+                    T_plucker = T_plucker[:bs].to(self.device)
+                T_combined = torch.cat([T, T_plucker], dim=-1)  # [batch, 10]
+                print(f"Using Plucker mode: T_combined shape = {T_combined.shape}")
+            else:
+                # Use only spherical coordinates (vanilla mode)
+                T_combined = T  # [batch, 4]
+                print(f"Using vanilla mode: T_combined shape = {T_combined.shape}")
 
             cond["c_crossattn"] = [self.cc_projection(torch.cat([torch.where(prompt_mask, null_prompt, clip_emb), T_combined[:, None, :]], dim=-1))]
-            ###
 
         cond["c_concat"] = [input_mask * self.encode_first_stage((xc.to(self.device))).mode().detach()]
         out = [z, cond]
@@ -1166,7 +1261,7 @@ class LatentDiffusion(DDPM):
                 img_orig = self.q_sample(x0, ts)
                 img = img_orig * mask + (1. - mask) * img
 
-            if i % log_every_t == 0 or i == timesteps - 1:
+            if i % self.log_every_t == 0 or i == timesteps - 1:
                 intermediates.append(x0_partial)
             if callback: callback(i)
             if img_callback: img_callback(img, i)
