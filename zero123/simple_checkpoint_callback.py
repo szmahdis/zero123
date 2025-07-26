@@ -18,18 +18,33 @@ class SimpleCheckpointCallback(Callback):
         current_step = trainer.global_step
         
         if current_step >= self.save_every_n_steps and current_step - self.last_save_step >= self.save_every_n_steps:
-            # Create save directory if it doesn't exist
-            os.makedirs(self.save_dir, exist_ok=True)
-            
-            # Generate filename
-            filename = self.filename_pattern.format(
-                epoch=trainer.current_epoch,
-                step=current_step
-            )
-            
-            # Save checkpoint
-            checkpoint_path = os.path.join(self.save_dir, f"{filename}.ckpt")
-            trainer.save_checkpoint(checkpoint_path)
-            
-            print(f"Saved checkpoint at step {current_step}: {checkpoint_path}")
-            self.last_save_step = current_step
+            try:
+                # Create save directory if it doesn't exist
+                os.makedirs(self.save_dir, exist_ok=True)
+                
+                # Generate filename
+                filename = self.filename_pattern.format(
+                    epoch=trainer.current_epoch,
+                    step=current_step
+                )
+                
+                # Save checkpoint
+                checkpoint_path = os.path.join(self.save_dir, f"{filename}.ckpt")
+                trainer.save_checkpoint(checkpoint_path)
+                
+                print(f"Saved checkpoint at step {current_step}: {checkpoint_path}")
+                self.last_save_step = current_step
+                
+            except Exception as e:
+                print(f"Failed to save checkpoint at step {current_step}: {str(e)}")
+    
+    def on_train_start(self, trainer, pl_module):
+        """Log checkpoint configuration at training start."""
+        print(f"Checkpoint callback configured:")
+        print(f"   - Save directory: {self.save_dir}")
+        print(f"   - Save every {self.save_every_n_steps} steps")
+        print(f"   - Filename pattern: {self.filename_pattern}")
+        
+        # Ensure save directory exists
+        os.makedirs(self.save_dir, exist_ok=True)
+        print(f"   - Directory created/verified: {self.save_dir}")

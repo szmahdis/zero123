@@ -30,6 +30,10 @@ from ldm.util import instantiate_from_config
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:64"
 MULTINODE_HACKS = False
 
+# FIX: Replaced TestTubeLogger with TensorBoardLogger to resolve pandas/numpy compatibility issues
+# The original error was caused by test-tube trying to save numpy arrays as experiment tags
+# which failed with newer versions of pandas. TensorBoardLogger is more stable and compatible.
+
 
 @rank_zero_only
 def rank_zero_print(*args):
@@ -347,7 +351,7 @@ class ImageLogger(Callback):
         self.batch_freq = batch_frequency
         self.max_images = max_images
         self.logger_log_images = {
-            pl.loggers.TestTubeLogger: self._testtube,
+            pl.loggers.TensorBoardLogger: self._tensorboard,
         }
         self.log_steps = [
             2 ** n for n in range(int(np.log2(self.batch_freq)) + 1)]
@@ -361,7 +365,7 @@ class ImageLogger(Callback):
         self.log_all_val = log_all_val
 
     @rank_zero_only
-    def _testtube(self, pl_module, images, batch_idx, split):
+    def _tensorboard(self, pl_module, images, batch_idx, split):
         for k in images:
             grid = torchvision.utils.make_grid(images[k])
             grid = (grid + 1.0) / 2.0  # -1,1 -> 0,1; c,h,w
@@ -487,7 +491,7 @@ class SingleImageLogger(Callback):
         self.batch_freq = batch_frequency
         self.max_images = max_images
         self.logger_log_images = {
-            pl.loggers.TestTubeLogger: self._testtube,
+            pl.loggers.TensorBoardLogger: self._tensorboard,
         }
         self.log_steps = [
             2 ** n for n in range(int(np.log2(self.batch_freq)) + 1)]
@@ -501,7 +505,7 @@ class SingleImageLogger(Callback):
         self.log_always = log_always
 
     @rank_zero_only
-    def _testtube(self, pl_module, images, batch_idx, split):
+    def _tensorboard(self, pl_module, images, batch_idx, split):
         for k in images:
             grid = torchvision.utils.make_grid(images[k])
             grid = (grid + 1.0) / 2.0  # -1,1 -> 0,1; c,h,w
@@ -757,15 +761,15 @@ if __name__ == "__main__":
                     "id": nowname,
                 }
             },
-            "testtube": {
-                "target": "pytorch_lightning.loggers.TestTubeLogger",
+            "tensorboard": {
+                "target": "pytorch_lightning.loggers.TensorBoardLogger",
                 "params": {
-                    "name": "testtube",
+                    "name": "tensorboard",
                     "save_dir": logdir,
                 }
             },
         }
-        default_logger_cfg = default_logger_cfgs["testtube"]
+        default_logger_cfg = default_logger_cfgs["tensorboard"]
         if "logger" in lightning_config:
             logger_cfg = lightning_config.logger
         else:

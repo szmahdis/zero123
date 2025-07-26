@@ -39,15 +39,16 @@ class SimpleObjaverseData(Dataset):
             for i in range(self.total_view):
                 png_path = os.path.join(full_path, f'{i:03d}.png')
                 npy_path = os.path.join(full_path, f'{i:03d}.npy')
-                if os.path.exists(png_path) and os.path.exists(npy_path):
+                control_path = os.path.join(full_path, 'control', f'{i:03d}_control.png')
+                if os.path.exists(png_path) and os.path.exists(npy_path) and os.path.exists(control_path):
                     valid_indices.append(i)
             if len(valid_indices) < 2:
-                print(f"Skipping {path}: not enough valid views (found {len(valid_indices)}, need at least 2)")
+                print(f"Skipping {path}: not enough valid views with control images (found {len(valid_indices)}, need at least 2)")
                 continue
 
             self.paths.append(path)
 
-        print(f"After filtering, {len(self.paths)} objects have at least 2 views with both PNG and NPY.")
+        print(f"After filtering, {len(self.paths)} objects have at least 2 views with PNG, NPY, and control images.")
 
         total_objects = len(self.paths)
         # Split into train/val
@@ -75,6 +76,14 @@ class SimpleObjaverseData(Dataset):
             transforms.Lambda(lambda x: rearrange(x * 2. - 1., 'c h w -> h w c'))
         ]
         self.image_transforms = transforms.Compose(image_transforms)
+        
+        # Create transforms for control images (grayscale)
+        control_transforms = [
+            transforms.Resize(image_size),
+            transforms.ToTensor(),
+            transforms.Lambda(lambda x: rearrange(x, 'c h w -> h w c'))  # Keep as single channel
+        ]
+        self.control_transforms = transforms.Compose(control_transforms)
 
     def __len__(self):
         return len(self.paths)
@@ -123,16 +132,31 @@ class SimpleObjaverseData(Dataset):
             img = Image.fromarray(np.uint8(img * 255.)).convert('RGB')
         return img
 
+    def load_control_im(self, path):
+        """Load control image (grayscale)."""
+        try:
+            img = plt.imread(path)
+            if img.ndim == 3:
+                # Convert to grayscale if RGB
+                img = np.mean(img, axis=2)
+            # Normalize to [0, 1]
+            img = img / 255.0
+            return Image.fromarray(np.uint8(img * 255.))
+        except Exception as e:
+            print(f"Failed to load control image: {path}, error: {e}")
+            return Image.new('L', (256, 256), (0))
+
     def __getitem__(self, index):
         data = {}
         total_view = self.total_view
         filename = os.path.join(self.root_dir, self.paths[index])
-        # Find valid indices (both png and npy present)
+        # Find valid indices (png, npy, and control present)
         valid_indices = [i for i in range(total_view)
                          if os.path.exists(os.path.join(filename, f'{i:03d}.png')) and
-                            os.path.exists(os.path.join(filename, f'{i:03d}.npy'))]
+                            os.path.exists(os.path.join(filename, f'{i:03d}.npy')) and
+                            os.path.exists(os.path.join(filename, 'control', f'{i:03d}_control.png'))]
         if len(valid_indices) < 2:
-            raise RuntimeError(f"Object {self.paths[index]} does not have 2 valid views at runtime!")
+            raise RuntimeError(f"Object {self.paths[index]} does not have 2 valid views with control images at runtime!")
 
         index_target, index_cond = random.sample(valid_indices, 2)
 
@@ -142,15 +166,23 @@ class SimpleObjaverseData(Dataset):
             cond_im = self.process_im(self.load_im(os.path.join(filename, '%03d.png' % index_cond), color))
             target_RT = np.load(os.path.join(filename, '%03d.npy' % index_target))
             cond_RT = np.load(os.path.join(filename, '%03d.npy' % index_cond))
+            
+            # Load control images
+            target_control = self.process_control_im(self.load_control_im(os.path.join(filename, 'control', '%03d_control.png' % index_target)))
+            cond_control = self.process_control_im(self.load_control_im(os.path.join(filename, 'control', '%03d_control.png' % index_cond)))
+            
         except Exception as e:
             print(f"Error loading data from {filename}: {e}")
             target_im = torch.zeros((256, 256, 3))
             cond_im = torch.zeros((256, 256, 3))
             target_RT = np.eye(4)
             cond_RT = np.eye(4)
+            target_control = torch.zeros((256, 256, 1))
+            cond_control = torch.zeros((256, 256, 1))
 
         data["image_target"] = target_im
         data["image_cond"] = cond_im
+        data["control"] = cond_control  # Control image for conditioning
         data["T"] = self.get_T(target_RT, cond_RT)
 
         return data
@@ -158,6 +190,10 @@ class SimpleObjaverseData(Dataset):
     def process_im(self, im):
         im = im.convert("RGB")
         return self.image_transforms(im)
+    
+    def process_control_im(self, im):
+        im = im.convert("L")  # Convert to grayscale
+        return self.control_transforms(im)
 
 class SimpleObjaverseDataModule(pl.LightningDataModule):
     def __init__(self, root_dir, batch_size=2, total_view=12, num_workers=0, image_size=256):
