@@ -473,8 +473,12 @@ def run_demo(
     print('sys.argv:', sys.argv)
     if len(sys.argv) > 1:
         print('old device_idx:', device_idx)
-        device_idx = int(sys.argv[1])
-        print('new device_idx:', device_idx)
+        try:
+            device_idx = int(sys.argv[1])
+            print('new device_idx:', device_idx)
+        except ValueError:
+            # If sys.argv[1] is not a number (e.g., 'gradio'), ignore it
+            print('sys.argv[1] is not a valid device index, using default:', device_idx)
 
     device = f'cuda:{device_idx}'
     config = OmegaConf.load(config)
@@ -653,6 +657,14 @@ def run_demo(
                                     0.0, 180.0, 0.0),
                        inputs=preset_inputs, outputs=preset_outputs)
 
+    # Create a custom temp directory in the current working directory
+    import os
+    temp_dir = os.path.join(os.getcwd(), 'gradio_temp')
+    os.makedirs(temp_dir, exist_ok=True)
+    
+    # Set environment variable for Gradio temp directory
+    os.environ['GRADIO_TEMP_DIR'] = temp_dir
+    
     demo.launch(share=True)
 
 @torch.no_grad()

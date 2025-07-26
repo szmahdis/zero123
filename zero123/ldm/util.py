@@ -68,22 +68,54 @@ def load_and_preprocess(interface, input_im):
     # See https://github.com/Ir1d/image-background-remove-tool
     image = input_im.convert('RGB')
 
-    image_without_background = interface([image])[0]
-    image_without_background = np.array(image_without_background)
-    est_seg = image_without_background > 127
-    image = np.array(image)
-    foreground = est_seg[:, : , -1].astype(np.bool_)
-    image[~foreground] = [255., 255., 255.]
-    x, y, w, h = cv2.boundingRect(foreground.astype(np.uint8))
-    image = image[y:y+h, x:x+w, :]
-    image = PIL.Image.fromarray(np.array(image))
-    
-    # resize image such that long edge is 512
-    image.thumbnail([200, 200], Image.Resampling.LANCZOS)
-    image = add_margin(image, (255, 255, 255), size=256)
-    image = np.array(image)
-    
-    return image
+    try:
+        image_without_background = interface([image])[0]
+        # Ensure we have a proper numpy array
+        if not isinstance(image_without_background, np.ndarray):
+            image_without_background = np.array(image_without_background)
+        
+        # Handle different output formats from Carvekit
+        if image_without_background.ndim == 3:
+            if image_without_background.shape[2] == 4:  # RGBA
+                est_seg = image_without_background[:, :, 3] > 127
+            elif image_without_background.shape[2] == 3:  # RGB
+                # If no alpha channel, assume all pixels are foreground
+                est_seg = np.ones(image_without_background.shape[:2], dtype=bool)
+            else:
+                # Fallback: assume all pixels are foreground
+                est_seg = np.ones(image_without_background.shape[:2], dtype=bool)
+        else:
+            # Fallback: assume all pixels are foreground
+            est_seg = np.ones(image_without_background.shape[:2], dtype=bool)
+        
+        image = np.array(image)
+        foreground = est_seg.astype(np.bool_)
+        image[~foreground] = [255., 255., 255.]
+        
+        # Ensure foreground is a proper numpy array for cv2.boundingRect
+        foreground_uint8 = foreground.astype(np.uint8)
+        if foreground_uint8.sum() > 0:  # Only process if there's foreground content
+            x, y, w, h = cv2.boundingRect(foreground_uint8)
+            image = image[y:y+h, x:x+w, :]
+        
+        image = PIL.Image.fromarray(np.array(image))
+        
+        # resize image such that long edge is 512
+        image.thumbnail([200, 200], Image.Resampling.LANCZOS)
+        image = add_margin(image, (255, 255, 255), size=256)
+        image = np.array(image)
+        
+        return image
+        
+    except Exception as e:
+        print(f"Error in background removal: {e}")
+        print("Falling back to original image processing...")
+        # Fallback: just resize and center the original image
+        image = input_im.convert('RGB')
+        image.thumbnail([200, 200], Image.Resampling.LANCZOS)
+        image = add_margin(image, (255, 255, 255), size=256)
+        image = np.array(image)
+        return image
 
 
 def log_txt_as_img(wh, xc, size=10):
