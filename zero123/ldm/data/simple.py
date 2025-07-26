@@ -167,17 +167,25 @@ class NfpDataset(Dataset):
 
 class ObjaverseDataModuleFromConfig(pl.LightningDataModule):
     def __init__(self, root_dir, batch_size, total_view, train=None, validation=None,
-                 test=None, num_workers=4, **kwargs):
+                 test=None, num_workers=4, max_samples=None, **kwargs):
         super().__init__(self)
         self.root_dir = root_dir
         self.batch_size = batch_size
         self.num_workers = num_workers
         self.total_view = total_view
+        self.max_samples = max_samples  # NEW: limit dataset size
 
+        # Store train and validation configs
+        self.train_config = train
+        self.validation_config = validation
+
+        # Get image transforms from either config
         if train is not None:
             dataset_config = train
-        if validation is not None:
+        elif validation is not None:
             dataset_config = validation
+        else:
+            dataset_config = {}
 
         if 'image_transforms' in dataset_config:
             image_transforms = [torchvision.transforms.Resize(dataset_config.image_transforms.size)]
@@ -187,22 +195,52 @@ class ObjaverseDataModuleFromConfig(pl.LightningDataModule):
                                 transforms.Lambda(lambda x: rearrange(x * 2. - 1., 'c h w -> h w c'))])
         self.image_transforms = torchvision.transforms.Compose(image_transforms)
 
-
     def train_dataloader(self):
-        dataset = ObjaverseData(root_dir=self.root_dir, total_view=self.total_view, validation=False, \
-                                image_transforms=self.image_transforms)
+        # Get use_plucker from train config
+        use_plucker = self.train_config.get('use_plucker', False) if self.train_config else False
+        
+        dataset = ObjaverseData(
+            root_dir=self.root_dir, 
+            total_view=self.total_view, 
+            validation=False,
+            use_plucker=use_plucker,  # PASS THE PARAMETER
+            max_samples=self.max_samples,  # PASS MAX SAMPLES
+            image_transforms=self.image_transforms
+        )
         sampler = DistributedSampler(dataset)
         return wds.WebLoader(dataset, batch_size=self.batch_size, num_workers=self.num_workers, shuffle=False, sampler=sampler)
 
     def val_dataloader(self):
-        dataset = ObjaverseData(root_dir=self.root_dir, total_view=self.total_view, validation=True, \
-                                image_transforms=self.image_transforms)
+        # Get use_plucker from validation config
+        use_plucker = self.validation_config.get('use_plucker', False) if self.validation_config else False
+        
+        dataset = ObjaverseData(
+            root_dir=self.root_dir, 
+            total_view=self.total_view, 
+            validation=True,
+            use_plucker=use_plucker,  # PASS THE PARAMETER
+            max_samples=self.max_samples,  # PASS MAX SAMPLES
+            image_transforms=self.image_transforms
+        )
         sampler = DistributedSampler(dataset)
         return wds.WebLoader(dataset, batch_size=self.batch_size, num_workers=self.num_workers, shuffle=False)
     
     def test_dataloader(self):
-        return wds.WebLoader(ObjaverseData(root_dir=self.root_dir, total_view=self.total_view, validation=False),\
-                          batch_size=self.batch_size, num_workers=self.num_workers, shuffle=False)
+        use_plucker = self.validation_config.get('use_plucker', False) if self.validation_config else False
+        
+        return wds.WebLoader(
+            ObjaverseData(
+                root_dir=self.root_dir, 
+                total_view=self.total_view, 
+                validation=True,
+                use_plucker=use_plucker,  # PASS THE PARAMETER
+                max_samples=self.max_samples,  # PASS MAX SAMPLES
+                image_transforms=self.image_transforms
+            ),
+            batch_size=self.batch_size, 
+            num_workers=self.num_workers, 
+            shuffle=False
+        )
 
 
 class ObjaverseData(Dataset):
@@ -214,12 +252,14 @@ class ObjaverseData(Dataset):
         postprocess=None,
         return_paths=False,
         total_view=12,
-        validation=False
-        ) -> None:
-        """Create a dataset from a folder of images.
-        If you pass in a root directory it will be searched for images
-        ending in ext (ext can be a list)
-        """
+        validation=False,
+        use_plucker=False,
+        max_samples=None):  # NEW PARAMETER
+        
+        self.use_plucker = use_plucker
+        self.max_samples = max_samples
+        
+        """Create a dataset from a folder of images."""
         self.root_dir = Path(root_dir)
         self.default_trans = default_trans
         self.return_paths = return_paths
@@ -239,8 +279,16 @@ class ObjaverseData(Dataset):
             self.paths = self.paths[math.floor(total_objects / 100. * 99.):] # used last 1% as validation
         else:
             self.paths = self.paths[:math.floor(total_objects / 100. * 99.)] # used first 99% as training
+        
+        # LIMIT TO max_samples IF SPECIFIED
+        if self.max_samples is not None and self.max_samples > 0:
+            self.paths = self.paths[:self.max_samples]
+            print(f'============= limiting dataset to {self.max_samples} samples =============')
+        
         print('============= length of dataset %d =============' % len(self.paths))
         self.tform = image_transforms
+
+        print(f"ObjaverseData initialized with mode: {'plucker' if self.use_plucker else 'vanilla'}")
 
     def __len__(self):
         return len(self.paths)
@@ -270,6 +318,72 @@ class ObjaverseData(Dataset):
         
         d_T = torch.tensor([d_theta.item(), math.sin(d_azimuth.item()), math.cos(d_azimuth.item()), d_z.item()])
         return d_T
+
+    ### ADDED BY ME ###
+    def get_plucker_coordinates(self, target_RT, cond_RT):
+        """
+        convert relative camera transformation to plucker coordinates.
+        args:
+            target_RT: 4x4 transformation matrix for target view
+            cond_RT: 4x4 transformation matrix for condition view
+        returns:
+            plucker_coords: 6-dimensional plucker coordinate vector
+        """
+        # extract rotation and translation from 4x4 transformation matrices
+        # [:3, :3] = first 3 rows, first 3 columns = 3x3 rotation matrix
+        # [:3, 3] = first 3 rows, 4th column = 3x1 translation vector
+        # the 4x4 matrix structure is: [R_3x3  t_3x1]
+        #                              [0_1x3   1   ]
+        R_target, t_target = target_RT[:3, :3], target_RT[:3, 3]
+        R_cond, t_cond = cond_RT[:3, :3], cond_RT[:3, 3] 
+        
+        # compute camera centers in world coordinates
+        # camera center = -R^T @ t (inverse transformation to get world position)
+        center_cond = -R_cond.T @ t_cond    # condition camera center in world coordinates
+        center_target = -R_target.T @ t_target  # target camera center in world coordinates
+        
+        # compute direction vector from condition camera to target camera
+        # this represents the spatial relationship between the two camera positions
+        direction = center_target - center_cond
+        
+        # handle edge case when cameras are at the same position
+        # if cameras are too close, use viewing direction difference instead
+        if np.linalg.norm(direction) < 1e-8:
+            # extract viewing directions from rotation matrices
+            # in camera coordinates: z-axis points forward
+            # R[:, 2] = third column of rotation matrix = where z-axis points in world coordinates
+            d_target = R_target[:, 2]  # target camera viewing direction in world coordinates
+            d_cond = R_cond[:, 2]      # condition camera viewing direction in world coordinates
+            direction = d_target - d_cond
+            
+            # if viewing directions are also identical, use default direction
+            # this prevents division by zero in normalization
+            if np.linalg.norm(direction) < 1e-8:
+                direction = np.array([1.0, 0.0, 0.0])  # default to x-axis direction
+        
+        # normalize direction vector to unit length (ensures consistent scale and numerical stability)
+        # this gives us the first 3 components of plucker coordinates
+        d_norm = direction / np.linalg.norm(direction)
+        
+        # compute moment vector: m = p × d
+        # the moment vector describes the line's position relative to the origin
+        # we use the condition camera center as our point p on the line
+        moment = np.cross(center_cond, d_norm)
+        
+        # normalize moment vector for consistency (ensures the plucker coordinates have consistent scale)
+        # handle case where moment vector might be zero
+        if np.linalg.norm(moment) > 1e-8:
+            m_norm = moment / np.linalg.norm(moment)
+        else:
+            m_norm = np.zeros(3)  # zero moment if cameras are on a line through origin
+        
+        # combine direction and moment into 6d plucker coordinates
+        # [d_x, d_y, d_z, m_x, m_y, m_z]
+        # first 3: direction vector (where the line points)
+        # last 3: moment vector (where the line is located relative to origin)
+        plucker_coords = np.concatenate([d_norm, m_norm])
+        
+        return torch.tensor(plucker_coords, dtype=torch.float32)
 
     def load_im(self, path, color):
         '''
@@ -316,6 +430,10 @@ class ObjaverseData(Dataset):
         data["image_target"] = target_im
         data["image_cond"] = cond_im
         data["T"] = self.get_T(target_RT, cond_RT)
+
+        # Conditionally compute Plucker coordinates
+        if self.use_plucker:
+            data["T_plucker"] = self.get_plucker_coordinates(target_RT, cond_RT)
 
         if self.postprocess is not None:
             data = self.postprocess(data)
