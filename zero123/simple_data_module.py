@@ -213,8 +213,13 @@ class SimpleObjaverseDataModule(pl.LightningDataModule):
         )
         # Only use DistributedSampler if we're actually in a distributed setting
         try:
-            sampler = DistributedSampler(dataset)
-            shuffle = False
+            import torch.distributed as dist
+            if dist.is_initialized():
+                sampler = DistributedSampler(dataset)
+                shuffle = False
+            else:
+                sampler = None
+                shuffle = True
         except:
             sampler = None
             shuffle = True
@@ -235,8 +240,13 @@ class SimpleObjaverseDataModule(pl.LightningDataModule):
             image_size=self.image_size
         )
         try:
-            sampler = DistributedSampler(dataset)
-            shuffle = False
+            import torch.distributed as dist
+            if dist.is_initialized():
+                sampler = DistributedSampler(dataset)
+                shuffle = False
+            else:
+                sampler = None
+                shuffle = False
         except:
             sampler = None
             shuffle = False

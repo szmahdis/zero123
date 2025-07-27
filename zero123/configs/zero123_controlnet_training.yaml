@@ -46,7 +46,7 @@ model:
       target: ldm.modules.diffusionmodules.openaimodel.UNetModel
       params:
         image_size: 32
-        in_channels: 4  # Fixed: should be 4, not 8
+        in_channels: 4  # Should be 4 (from VAE latent), control features are added later
         out_channels: 4
         model_channels: 320
         attention_resolutions: [4, 2, 1]
@@ -122,3 +122,6 @@ lightning:
     sync_batchnorm: False
     enable_progress_bar: True
     max_epochs: 50  # Increased for proper training
+    # Disable distributed training for single GPU
+    accelerator: null
+    strategy: null

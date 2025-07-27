@@ -688,12 +688,25 @@ if __name__ == "__main__":
         lightning_config = config.pop("lightning", OmegaConf.create())
         # merge trainer cli with config
         trainer_config = lightning_config.get("trainer", OmegaConf.create())
-        # default to ddp
-        trainer_config["accelerator"] = "ddp"
+        
+        # Only use DDP if explicitly configured or if multiple GPUs are specified
+        if "accelerator" not in trainer_config:
+            if "gpus" in trainer_config:
+                gpuinfo = trainer_config["gpus"]
+                if isinstance(gpuinfo, int) and gpuinfo > 1:
+                    trainer_config["accelerator"] = "ddp"
+                elif isinstance(gpuinfo, str) and len(gpuinfo.split(',')) > 1:
+                    trainer_config["accelerator"] = "ddp"
+                else:
+                    # Single GPU, don't use DDP
+                    trainer_config["accelerator"] = None
+            else:
+                # No GPUs specified, don't use DDP
+                trainer_config["accelerator"] = None
+        
         for k in nondefault_trainer_args(opt):
             trainer_config[k] = getattr(opt, k)
         if not "gpus" in trainer_config:
-            del trainer_config["accelerator"]
             cpu = True
         else:
             gpuinfo = trainer_config["gpus"]
