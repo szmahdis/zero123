@@ -417,6 +417,15 @@ class ObjaverseData(Dataset):
             cond_im = self.process_im(self.load_im(os.path.join(filename, '%03d.png' % index_cond), color))
             target_RT = np.load(os.path.join(filename, '%03d.npy' % index_target))
             cond_RT = np.load(os.path.join(filename, '%03d.npy' % index_cond))
+            
+            # Load control image (edge map) for the target image
+            control_path = os.path.join(filename, 'control', '%03d_control.png' % index_target)
+            if os.path.exists(control_path):
+                control_im = self.load_im(control_path, [1.0])  # Load as grayscale
+                control_im = self.process_im(control_im)
+            else:
+                # Fallback: create empty control image
+                control_im = torch.zeros_like(target_im)
         except:
             # very hacky solution, sorry about this
             filename = os.path.join(self.root_dir, '692db5f2d3a04bb286cb977a7dba903e_1') # this one we know is valid
@@ -426,9 +435,11 @@ class ObjaverseData(Dataset):
             cond_RT = np.load(os.path.join(filename, '%03d.npy' % index_cond))
             target_im = torch.zeros_like(target_im)
             cond_im = torch.zeros_like(cond_im)
+            control_im = torch.zeros_like(target_im)
 
         data["image_target"] = target_im
         data["image_cond"] = cond_im
+        data["control"] = control_im  # Add control image with correct key
         data["T"] = self.get_T(target_RT, cond_RT)
 
         # Conditionally compute Plucker coordinates

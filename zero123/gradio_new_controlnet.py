@@ -141,7 +141,7 @@ def sample_model_controlnet(input_im, control_im, model, sampler, precision, h, 
             cond = {}
             cond['c_crossattn'] = [c]
             
-            # Process control image (edge map)
+            # Process control image (edge map) and input image concatenation
             if control_im is not None:
                 # Convert control image to tensor and normalize to [-1, 1] range
                 control_tensor = transforms.ToTensor()(control_im).unsqueeze(0).to(c.device)
@@ -156,9 +156,14 @@ def sample_model_controlnet(input_im, control_im, model, sampler, precision, h, 
                 cond['c_concat'] = [model.encode_first_stage((input_im.to(c.device))).mode().detach()
                                     .repeat(n_samples, 1, 1, 1)]
             
+            # Add input image concatenation (like original Zero123)
+            input_im_encoded = model.encode_first_stage((input_im.to(c.device))).mode().detach().repeat(n_samples, 1, 1, 1)
+            cond['c_concat'].append(input_im_encoded)
+            
             if scale != 1.0:
                 uc = {}
                 uc['c_concat'] = [torch.zeros(n_samples, 1, 256, 256).to(c.device)]  # 1 channel for edge maps at original resolution
+                uc['c_concat'].append(torch.zeros(n_samples, 4, h // 8, w // 8).to(c.device))  # 4 channels for input image encoding
                 uc['c_crossattn'] = [torch.zeros_like(c).to(c.device)]
             else:
                 uc = None

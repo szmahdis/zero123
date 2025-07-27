@@ -358,7 +358,7 @@ class ControlLDM(LatentDiffusion):
         control = einops.rearrange(control, 'b h w c -> b c h w')
         control = control.to(memory_format=torch.contiguous_format).float()
         
-        # Keep control image at original resolution (256x256) - ControlNet will handle downsampling
+        # Return only control image (ControlNet handles control separately)
         return x, dict(c_crossattn=[c], c_concat=[control])
 
     def apply_model(self, x_noisy, t, cond, *args, **kwargs):
@@ -390,9 +390,14 @@ class ControlLDM(LatentDiffusion):
         if cond['c_concat'] is None:
             eps = diffusion_model(x=x_noisy, timesteps=t, context=cond_txt, control=None, only_mid_control=self.only_mid_control)
         else:
-            # Process control image with ControlNet
-            control = self.control_model(x=x_noisy, hint=cond['c_concat'][0], timesteps=t, context=cond_txt)
+            # Extract control image from c_concat
+            control_image = cond['c_concat'][0]  # Edge map (hint)
+            
+            # Process control image with ControlNet (ControlNet gets VAE latent + hint)
+            control = self.control_model(x=x_noisy, hint=control_image, timesteps=t, context=cond_txt)
             control = [c * scale for c, scale in zip(control, self.control_scales)]
+            
+            # UNet gets VAE latent + control features (no input image concatenation)
             eps = diffusion_model(x=x_noisy, timesteps=t, context=cond_txt, control=control, only_mid_control=self.only_mid_control)
 
         return eps

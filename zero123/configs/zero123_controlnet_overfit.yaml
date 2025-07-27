@@ -1,0 +1,127 @@
+model:
+  base_learning_rate: 2.0e-04  # Higher learning rate for faster overfitting
+  target: ldm.modules.controlnet.ControlLDM
+  params:
+    linear_start: 0.00085
+    linear_end: 0.0120
+    num_timesteps_cond: 1
+    log_every_t: 200
+    timesteps: 1000
+    first_stage_key: "image_target"
+    cond_stage_key: "image_cond"
+    control_key: "control"
+    only_mid_control: true
+    image_size: 32
+    channels: 4
+    cond_stage_trainable: false
+    conditioning_key: hybrid
+    monitor: train/loss_simple
+    scale_factor: 0.18215
+    control_stage_config:
+      target: ldm.modules.controlnet.ControlNet
+      params:
+        image_size: 256
+        in_channels: 4
+        model_channels: 320
+        hint_channels: 1
+        num_res_blocks: 2
+        attention_resolutions: [ 4, 2, 1 ]
+        channel_mult: [ 1, 2, 4, 4 ]
+        num_heads: 8
+        use_spatial_transformer: true
+        transformer_depth: 1
+        context_dim: 768
+        use_checkpoint: true
+        legacy: False
+
+    scheduler_config:
+      target: ldm.lr_scheduler.LambdaLinearScheduler
+      params:
+        warm_up_steps: [100]
+        cycle_lengths: [100000000000]
+        f_start: [1.e-6]
+        f_max: [1.]
+        f_min: [1.]
+    unet_config:
+      target: ldm.modules.controlnet.ControlledUnetModel
+      params:
+        image_size: 32
+        in_channels: 4  # VAE latent only - ControlNet handles control separately
+        out_channels: 4
+        model_channels: 320
+        attention_resolutions: [4, 2, 1]
+        num_res_blocks: 2
+        channel_mult: [1, 2, 4, 4]    
+        num_heads: 8 
+        use_spatial_transformer: True
+        transformer_depth: 1
+        context_dim: 768
+        use_checkpoint: True
+        legacy: False
+    first_stage_config:
+      target: ldm.models.autoencoder.AutoencoderKL
+      params:
+        monitor: val/rec_loss
+        embed_dim: 4
+        ddconfig:
+          double_z: true
+          z_channels: 4
+          resolution: 256
+          in_channels: 3
+          out_ch: 3
+          ch: 128
+          ch_mult:
+          - 1
+          - 2
+          - 4
+          - 4
+          num_res_blocks: 2
+          attn_resolutions: []
+          dropout: 0.0
+        lossconfig:
+          target: torch.nn.Identity
+    cond_stage_config:
+      target: ldm.modules.encoders.modules.FrozenCLIPImageEmbedder
+
+data:
+  target: simple_data_module.SimpleObjaverseDataModule
+  params:
+    root_dir: 'views_release'  # Single object dataset (cleaned up)
+    batch_size: 1
+    num_workers: 4
+    total_view: 2
+    image_size: 256
+
+lightning:
+  find_unused_parameters: true
+  modelcheckpoint:
+    target: pytorch_lightning.callbacks.ModelCheckpoint
+    params:
+      dirpath: "checkpoints"
+      filename: "{epoch:06}-{step:09}"
+      every_n_train_steps: 5  # Save very frequently for monitoring
+      save_last: True
+      save_top_k: -1
+
+  callbacks:
+    simple_checkpoint:
+      target: simple_checkpoint_callback.SimpleCheckpointCallback
+      params:
+        save_every_n_steps: 5  # Save very frequently
+        save_dir: "checkpoints"
+        filename_pattern: "simple-{epoch:06}-{step:09}"
+
+  trainer:
+    benchmark: True
+    val_check_interval: 0.1  # Check validation very frequently
+    num_sanity_val_steps: 0
+    limit_val_batches: 0.0
+    accumulate_grad_batches: 1  # No gradient accumulation for faster overfitting
+    gradient_clip_val: 1.0
+    deterministic: False
+    sync_batchnorm: False
+    enable_progress_bar: True
+    max_epochs: 50  # Fewer epochs for single object
+    max_steps: 1000  # Limit steps for overfitting
+    accelerator: null
+    strategy: null 
