@@ -4,6 +4,8 @@ cd stable-diffusion
 python gradio_new.py 0
 '''
 
+## original gradio_new.py with original zero123 setup##
+
 import diffusers  # 0.12.1
 import math
 import fire
@@ -30,7 +32,6 @@ from rich import print
 from transformers import AutoFeatureExtractor #, CLIPImageProcessor
 from torch import autocast
 from torchvision import transforms
-from inference_utils import compute_plucker_from_spherical, load_model_with_mode_detection
 
 
 _SHOW_DESC = True
@@ -75,30 +76,15 @@ def load_model_from_config(config, ckpt, device, verbose=False):
 @torch.no_grad()
 def sample_model(input_im, model, sampler, precision, h, w, ddim_steps, n_samples, scale,
                  ddim_eta, x, y, z):
-    torch.cuda.empty_cache()  # Clear GPU memory before generation
     precision_scope = autocast if precision == 'autocast' else nullcontext
     with precision_scope('cuda'):
         with model.ema_scope():
             c = model.get_learned_conditioning(input_im).tile(n_samples, 1, 1)
-            
-            # Compute 4D spherical coordinates
             T = torch.tensor([math.radians(x), math.sin(
                 math.radians(y)), math.cos(math.radians(y)), z])
             T = T[None, None, :].repeat(n_samples, 1, 1).to(c.device)
-            
-            # Conditionally compute Plucker coordinates
-            if model.use_plucker:
-                T_plucker = compute_plucker_from_spherical(x, y, z)
-                T_plucker = T_plucker[None, None, :].repeat(n_samples, 1, 1).to(c.device)
-                T_combined = torch.cat([T, T_plucker], dim=-1)
-                print(f"Using Plucker mode for inference: {T_combined.shape}")
-            else:
-                T_combined = T
-                print(f"Using vanilla mode for inference: {T_combined.shape}")
-            
-            c = torch.cat([c, T_combined], dim=-1)
+            c = torch.cat([c, T], dim=-1)
             c = model.cc_projection(c)
-            
             cond = {}
             cond['c_crossattn'] = [c]
             cond['c_concat'] = [model.encode_first_stage((input_im.to(c.device))).mode().detach()
@@ -499,10 +485,10 @@ def run_demo(
     device = f'cuda:{device_idx}'
     config = OmegaConf.load(config)
 
-    # Use smart loading that detects the mode
+    # Instantiate all models beforehand for efficiency.
     models = dict()
     print('Instantiating LatentDiffusion...')
-    models['turncam'] = load_model_with_mode_detection(config, ckpt, device=device)
+    models['turncam'] = load_model_from_config(config, ckpt, device=device)
     print('Instantiating Carvekit HiInterface...')
     models['carvekit'] = create_carvekit_interface()
     print('Instantiating StableDiffusionSafetyChecker...')
@@ -564,13 +550,13 @@ def run_demo(
                     -0.5, 0.5, value=0.0, step=0.1, label='Zoom (relative distance from center)')
                 # info='Positive values move the camera further away, while negative values move the camera closer.')
 
-                samples_slider = gr.Slider(1, 8, value=1, step=1,
+                samples_slider = gr.Slider(1, 8, value=4, step=1,
                                            label='Number of samples to generate')
 
                 with gr.Accordion('Advanced options', open=False):
                     scale_slider = gr.Slider(0, 30, value=3, step=1,
                                              label='Diffusion guidance scale')
-                    steps_slider = gr.Slider(5, 200, value=25, step=5,
+                    steps_slider = gr.Slider(5, 200, value=75, step=5,
                                              label='Number of diffusion inference steps')
 
                 with gr.Row():

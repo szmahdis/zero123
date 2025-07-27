@@ -58,14 +58,13 @@ class ControlDiffusionWrapper(pl.LightningModule):
 class ControlledUnetModel(UNetModel):
     def forward(self, x, timesteps=None, context=None, control=None, only_mid_control=False, **kwargs):
         hs = []
-        with torch.no_grad():
-            t_emb = timestep_embedding(timesteps, self.model_channels, repeat_only=False)
-            emb = self.time_embed(t_emb)
-            h = x.type(self.dtype)
-            for module in self.input_blocks:
-                h = module(h, emb, context)
-                hs.append(h)
-            h = self.middle_block(h, emb, context)
+        t_emb = timestep_embedding(timesteps, self.model_channels, repeat_only=False)
+        emb = self.time_embed(t_emb)
+        h = x.type(self.dtype)
+        for module in self.input_blocks:
+            h = module(h, emb, context)
+            hs.append(h)
+        h = self.middle_block(h, emb, context)
 
         if control is not None:
             h += control.pop()
