@@ -88,7 +88,7 @@ data:
     root_dir: 'views_release'
     batch_size: 1
     num_workers: 2  # Reduced from 4
-    total_view: 2
+    total_view: 12
     image_size: 256
 
 lightning:

@@ -181,18 +181,41 @@ class SimpleObjaverseData(Dataset):
         data = {}
         total_view = self.total_view
         filename = os.path.join(self.root_dir, self.expanded_paths[index])
+        print(f"Debug: Processing object at path: {filename}")
+        print(f"Debug: Object exists: {os.path.exists(filename)}")
+        
         # Find valid indices (png, npy, and control present)
         valid_indices = [i for i in range(total_view)
                          if os.path.exists(os.path.join(filename, f'{i:03d}.png')) and
                             os.path.exists(os.path.join(filename, f'{i:03d}.npy'))]
         
+        print(f"Debug: Found {len(valid_indices)} indices with PNG and NPY files: {valid_indices}")
+        
+        # Debug: Check each PNG and NPY file individually
+        print(f"Debug: Checking PNG and NPY files for indices 0-{total_view-1}:")
+        for i in range(total_view):
+            png_path = os.path.join(filename, f'{i:03d}.png')
+            npy_path = os.path.join(filename, f'{i:03d}.npy')
+            png_exists = os.path.exists(png_path)
+            npy_exists = os.path.exists(npy_path)
+            print(f"Debug: Index {i:03d}: PNG exists={png_exists}, NPY exists={npy_exists}")
+        
         # Check if control images exist
         control_exists = os.path.exists(os.path.join(filename, 'control'))
         if control_exists:
+            # Debug: Check each control image individually
+            print(f"Debug: Control directory exists at {os.path.join(filename, 'control')}")
+            print(f"Debug: Checking control images for indices 0-{total_view-1}:")
+            for i in range(total_view):
+                control_path = os.path.join(filename, 'control', f'{i:03d}_control.png')
+                exists = os.path.exists(control_path)
+                print(f"Debug: Control image {i:03d}_control.png exists: {exists}")
+            
             # Filter to only include indices with control images
             valid_indices = [i for i in valid_indices
                            if os.path.exists(os.path.join(filename, 'control', f'{i:03d}_control.png'))]
             print(f"Control images found, using {len(valid_indices)} valid indices")
+            print(f"Valid indices: {valid_indices}")
         else:
             print(f"No control directory found, using {len(valid_indices)} valid indices without control images")
         
@@ -204,27 +227,76 @@ class SimpleObjaverseData(Dataset):
         if len(valid_indices) < 2:
             raise RuntimeError(f"Object {self.expanded_paths[index]} does not have 2 valid views with control images at runtime!")
 
-        # Sample 2 random views for this training pair
-        index_target, index_cond = random.sample(valid_indices, 2)
+        # Use all available views instead of just sampling 2
+        # This will give us more training data per step
+        if len(valid_indices) >= 12:
+            # Use all 12 views if available
+            selected_indices = valid_indices  # Use all views
+            print(f"Using all {len(selected_indices)} views: {selected_indices}")
+        elif len(valid_indices) >= 8:
+            # Use 8 views if available
+            selected_indices = random.sample(valid_indices, 8)
+            print(f"Using 8 views: {selected_indices}")
+        elif len(valid_indices) >= 4:
+            # Use 4 views if available (more training data)
+            selected_indices = random.sample(valid_indices, 4)
+            print(f"Using 4 views: {selected_indices}")
+        elif len(valid_indices) >= 3:
+            # Use 3 views if available
+            selected_indices = random.sample(valid_indices, 3)
+            print(f"Using 3 views: {selected_indices}")
+        else:
+            # Fall back to 2 views
+            selected_indices = random.sample(valid_indices, 2)
+            print(f"Using 2 views: {selected_indices}")
 
         color = [1., 1., 1., 1.]
         
         try:
-            target_im = self.process_im(self.load_im(os.path.join(filename, '%03d.png' % index_target), color))
-            cond_im = self.process_im(self.load_im(os.path.join(filename, '%03d.png' % index_cond), color))
-            target_RT = np.load(os.path.join(filename, '%03d.npy' % index_target))
-            cond_RT = np.load(os.path.join(filename, '%03d.npy' % index_cond))
+            # Load all selected views
+            images = []
+            controls = []
+            RTs = []
             
-            # Load control images
-            if control_exists:
-                target_control_path = os.path.join(filename, 'control', '%03d_control.png' % index_target)
-                cond_control_path = os.path.join(filename, 'control', '%03d_control.png' % index_cond)
-                target_control = self.process_control_im(self.load_control_im(target_control_path))
-                cond_control = self.process_control_im(self.load_control_im(cond_control_path))
+            for idx in selected_indices:
+                im = self.process_im(self.load_im(os.path.join(filename, '%03d.png' % idx), color))
+                RT = np.load(os.path.join(filename, '%03d.npy' % idx))
+                
+                # Load control image
+                if control_exists:
+                    control_path = os.path.join(filename, 'control', '%03d_control.png' % idx)
+                    control = self.process_control_im(self.load_control_im(control_path))
+                else:
+                    control = torch.zeros((256, 256, 1))
+                
+                images.append(im)
+                controls.append(control)
+                RTs.append(RT)
+            
+            # For training, we need target and condition images
+            # Use random pairs from all available views instead of always using the first two
+            if len(images) >= 2:
+                # Randomly select 2 different views for target and condition
+                target_idx, cond_idx = random.sample(range(len(images)), 2)
+                target_im = images[target_idx]
+                cond_im = images[cond_idx]
+                target_RT = RTs[target_idx]
+                cond_RT = RTs[cond_idx]
+                cond_control = controls[cond_idx]  # Use control from condition image
+                print(f"Debug: Using views {target_idx} and {cond_idx} for training")
             else:
-                # Create empty control images if control directory doesn't exist
-                target_control = torch.zeros((256, 256, 1))
-                cond_control = torch.zeros((256, 256, 1))
+                # Fallback to first two if we don't have enough views
+                target_im = images[0]
+                cond_im = images[1]
+                target_RT = RTs[0]
+                cond_RT = RTs[1]
+                cond_control = controls[1]
+                print(f"Debug: Using first two views (fallback)")
+            
+            # Store additional views for potential future use
+            if len(images) > 2:
+                print(f"Debug: Loaded {len(images)} views, using random pair for training")
+                print(f"Debug: Additional views available: {len(images)-2}")
             
         except Exception as e:
             print(f"Error loading data from {filename}: {e}")
