@@ -135,13 +135,20 @@ class SimpleObjaverseData(Dataset):
     def load_control_im(self, path):
         """Load control image (grayscale)."""
         try:
-            img = plt.imread(path)
-            if img.ndim == 3:
+            # Try using PIL directly instead of plt.imread
+            img = Image.open(path)
+            
+            # Convert to numpy array
+            img_array = np.array(img)
+            
+            if img_array.ndim == 3:
                 # Convert to grayscale if RGB
-                img = np.mean(img, axis=2)
+                img_array = np.mean(img_array, axis=2)
+            
             # Normalize to [0, 1]
-            img = img / 255.0
-            return Image.fromarray(np.uint8(img * 255.))
+            img_array = img_array / 255.0
+            
+            return Image.fromarray(np.uint8(img_array * 255.))
         except Exception as e:
             print(f"Failed to load control image: {path}, error: {e}")
             return Image.new('L', (256, 256), (0))
@@ -168,8 +175,10 @@ class SimpleObjaverseData(Dataset):
             cond_RT = np.load(os.path.join(filename, '%03d.npy' % index_cond))
             
             # Load control images
-            target_control = self.process_control_im(self.load_control_im(os.path.join(filename, 'control', '%03d_control.png' % index_target)))
-            cond_control = self.process_control_im(self.load_control_im(os.path.join(filename, 'control', '%03d_control.png' % index_cond)))
+            target_control_path = os.path.join(filename, 'control', '%03d_control.png' % index_target)
+            cond_control_path = os.path.join(filename, 'control', '%03d_control.png' % index_cond)
+            target_control = self.process_control_im(self.load_control_im(target_control_path))
+            cond_control = self.process_control_im(self.load_control_im(cond_control_path))
             
         except Exception as e:
             print(f"Error loading data from {filename}: {e}")
@@ -193,7 +202,8 @@ class SimpleObjaverseData(Dataset):
     
     def process_control_im(self, im):
         im = im.convert("L")  # Convert to grayscale
-        return self.control_transforms(im)
+        tensor = self.control_transforms(im)
+        return tensor
 
 class SimpleObjaverseDataModule(pl.LightningDataModule):
     def __init__(self, root_dir, batch_size=2, total_view=12, num_workers=0, image_size=256):

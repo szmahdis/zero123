@@ -2,6 +2,8 @@ import einops
 import torch
 import torch as th
 import torch.nn as nn
+import os
+from torchvision.utils import save_image
 
 from ldm.modules.diffusionmodules.util import (
     conv_nd,
@@ -194,7 +196,17 @@ class ControlNet(nn.Module):
             nn.SiLU(),
             conv_nd(dims, 96, 256, 3, padding=1, stride=2),
             nn.SiLU(),
-            zero_module(conv_nd(dims, 256, model_channels, 3, padding=1))
+            conv_nd(dims, 256, 256, 3, padding=1),
+            nn.SiLU(),
+            conv_nd(dims, 256, 512, 3, padding=1, stride=2),
+            nn.SiLU(),
+            conv_nd(dims, 512, 512, 3, padding=1),
+            nn.SiLU(),
+            conv_nd(dims, 512, 512, 3, padding=1, stride=2),
+            nn.SiLU(),
+            conv_nd(dims, 512, 512, 3, padding=1),
+            nn.SiLU(),
+            zero_module(conv_nd(dims, 512, model_channels, 3, padding=1))
         )
 
         self._feature_size = model_channels
@@ -324,12 +336,7 @@ class ControlNet(nn.Module):
 
         h = x.type(self.dtype)
         for module, zero_conv in zip(self.input_blocks, self.zero_convs):
-            if guided_hint is not None:
-                h = module(h, emb, context)
-                h += guided_hint
-                guided_hint = None
-            else:
-                h = module(h, emb, context)
+            h = module(h, emb, context)
             outs.append(zero_conv(h, emb, context))
 
         h = self.middle_block(h, emb, context)
@@ -347,6 +354,9 @@ class ControlLDM(LatentDiffusion):
         self.only_mid_control = only_mid_control
         self.control_scales = [1.0] * 13
         self.sd_locked = False  # Add missing attribute
+        
+        # Create output directory for debugging images
+        os.makedirs("debug_outputs", exist_ok=True)
 
     @torch.no_grad()
     def get_input(self, batch, k, bs=None, *args, **kwargs):
@@ -406,6 +416,43 @@ class ControlLDM(LatentDiffusion):
     def get_unconditional_conditioning(self, N):
         return self.get_learned_conditioning([""] * N)
 
+    def save_debug_images(self, batch, samples=None, step_name="step"):
+        """Save input, generated, and control images for debugging"""
+        try:
+            # Get input data
+            x, c = self.get_input(batch, self.first_stage_key, bs=1)
+            c_cat = c["c_concat"][0][:1] if isinstance(c["c_concat"][0], torch.Tensor) else c["c_concat"][0]
+            
+            # Save input reconstruction
+            recon = self.decode_first_stage(x[:1])
+            save_image(recon, f"debug_outputs/input_{step_name}.png")
+            print(f"Saved input image to debug_outputs/input_{step_name}.png")
+            
+            # Save control image
+            if isinstance(c_cat, torch.Tensor):
+                # Ensure control image is in correct format for saving
+                if c_cat.dim() == 3 and c_cat.shape[0] == 1:  # [1, H, W]
+                    control_img = c_cat
+                elif c_cat.dim() == 3 and c_cat.shape[2] == 1:  # [H, W, 1]
+                    control_img = c_cat.permute(2, 0, 1)  # [1, H, W]
+                else:
+                    control_img = c_cat
+                
+                save_image(control_img, f"debug_outputs/control_{step_name}.png")
+                print(f"Saved control image to debug_outputs/control_{step_name}.png")
+            
+            # Save generated samples if provided
+            if samples is not None:
+                if isinstance(samples, torch.Tensor):
+                    generated = self.decode_first_stage(samples[:1])
+                    save_image(generated, f"debug_outputs/generated_{step_name}.png")
+                    print(f"Saved generated image to debug_outputs/generated_{step_name}.png")
+            
+        except Exception as e:
+            print(f"Failed to save debug images: {e}")
+            import traceback
+            traceback.print_exc()
+
     @torch.no_grad()
     def log_images(self, batch, N=4, n_row=2, sample=False, ddim_steps=50, ddim_eta=0.0, return_keys=None,
                    quantize_denoised=True, inpaint=True, plot_denoise_rows=False, plot_progressive_rows=True,
@@ -416,12 +463,21 @@ class ControlLDM(LatentDiffusion):
 
         log = dict()
         z, c = self.get_input(batch, self.first_stage_key, bs=N)
-        c_cat, c = c["c_concat"][0][:N], c["c_crossattn"][0][:N]
+        c_cat = c["c_concat"][0][:N] if isinstance(c["c_concat"][0], torch.Tensor) else c["c_concat"][0]
+        c_cross = c["c_crossattn"][0][:N] if isinstance(c["c_crossattn"][0], torch.Tensor) else c["c_crossattn"][0]
         N = min(z.shape[0], N)
         n_row = min(z.shape[0], n_row)
         log["reconstruction"] = self.decode_first_stage(z)
-        log["control"] = c_cat * 2.0 - 1.0
-        log["conditioning"] = log_txt_as_img((512, 512), batch[self.cond_stage_key], size=16)
+        
+        # Save control image properly
+        if isinstance(c_cat, torch.Tensor):
+            print(f"Control tensor shape: {c_cat.shape}, range: [{c_cat.min():.3f}, {c_cat.max():.3f}]")
+            if c_cat.dim() == 3 and c_cat.shape[2] == 1:
+                log["control"] = c_cat.permute(2, 0, 1)  # [1, H, W] - keep as grayscale
+            else:
+                log["control"] = c_cat
+        else:
+            log["control"] = None
 
         if plot_diffusion_rows:
             # get diffusion row
@@ -443,11 +499,15 @@ class ControlLDM(LatentDiffusion):
 
         if sample:
             # get denoise row
-            samples, z_denoise_row = self.sample_log(cond={"c_concat": [c_cat], "c_crossattn": [c]},
+            samples, z_denoise_row = self.sample_log(cond={"c_concat": [c_cat], "c_crossattn": [c_cross]},
                                                      batch_size=N, ddim=use_ddim,
                                                      ddim_steps=ddim_steps, eta=ddim_eta)
             x_samples = self.decode_first_stage(samples)
             log["samples"] = x_samples
+            
+            # Save debug images
+            self.save_debug_images(batch, samples, f"log_{self.global_step}")
+            
             if plot_denoise_rows:
                 denoise_grid = self._get_denoise_row_from_list(z_denoise_row)
                 log["denoise_row"] = denoise_grid
@@ -456,7 +516,7 @@ class ControlLDM(LatentDiffusion):
             uc_cross = self.get_unconditional_conditioning(N)
             uc_cat = c_cat  # torch.zeros_like(c_cat)
             uc_full = {"c_concat": [uc_cat], "c_crossattn": [uc_cross]}
-            samples_cfg, _ = self.sample_log(cond={"c_concat": [c_cat], "c_crossattn": [c]},
+            samples_cfg, _ = self.sample_log(cond={"c_concat": [c_cat], "c_crossattn": [c_cross]},
                                              batch_size=N, ddim=use_ddim,
                                              ddim_steps=ddim_steps, eta=ddim_eta,
                                              unconditional_guidance_scale=unconditional_guidance_scale,
@@ -482,6 +542,32 @@ class ControlLDM(LatentDiffusion):
         params += list(self.model.diffusion_model.out.parameters())
         opt = torch.optim.AdamW(params, lr=lr)
         return opt
+
+    def training_step(self, batch, batch_idx):
+        loss = super().training_step(batch, batch_idx)
+        print(f"[Step {batch_idx}] Training loss: {loss.item():.5f}")
+        
+        # Save debug images every 10 steps during training
+        if batch_idx % 10 == 0:
+            try:
+                # Generate samples for debugging
+                x, c = self.get_input(batch, self.first_stage_key, bs=1)
+                c_cat = c["c_concat"][0][:1] if isinstance(c["c_concat"][0], torch.Tensor) else c["c_concat"][0]
+                c_cross = c["c_crossattn"][0][:1] if isinstance(c["c_crossattn"][0], torch.Tensor) else c["c_crossattn"][0]
+                
+                # Generate samples
+                samples, _ = self.sample_log(cond={"c_concat": [c_cat], "c_crossattn": [c_cross]},
+                                           batch_size=1, ddim=True, ddim_steps=50)
+                
+                # Save debug images
+                self.save_debug_images(batch, samples, f"train_{self.global_step}")
+                
+            except Exception as e:
+                print(f"Failed to save training debug images: {e}")
+                import traceback
+                traceback.print_exc()
+        
+        return loss
 
     def low_vram_shift(self, is_diffusing):
         if is_diffusing:

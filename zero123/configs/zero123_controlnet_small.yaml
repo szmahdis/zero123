@@ -1,5 +1,5 @@
 model:
-  base_learning_rate: 2.0e-04  # Higher learning rate for faster overfitting
+  base_learning_rate: 5.0e-05
   target: ldm.modules.controlnet.ControlLDM
   params:
     linear_start: 0.00085
@@ -22,18 +22,17 @@ model:
       params:
         image_size: 256
         in_channels: 4
-        model_channels: 320
+        model_channels: 128  # Reduced from 320
         hint_channels: 1
-        num_res_blocks: 2
+        num_res_blocks: 1  # Reduced from 2
         attention_resolutions: [ 4, 2, 1 ]
-        channel_mult: [ 1, 2, 4, 4 ]
-        num_heads: 8
+        channel_mult: [ 1, 2, 4 ]  # Reduced from [1, 2, 4, 4]
+        num_heads: 4  # Reduced from 8
         use_spatial_transformer: true
         transformer_depth: 1
         context_dim: 768
         use_checkpoint: true
         legacy: False
- 
     scheduler_config:
       target: ldm.lr_scheduler.LambdaLinearScheduler
       params:
@@ -46,13 +45,13 @@ model:
       target: ldm.modules.controlnet.ControlledUnetModel
       params:
         image_size: 32
-        in_channels: 4  # VAE latent only - ControlNet handles control separately
+        in_channels: 4
         out_channels: 4
-        model_channels: 128
+        model_channels: 128  # Reduced from 320
         attention_resolutions: [4, 2, 1]
-        num_res_blocks: 2
-        channel_mult: [1, 2, 4, 4]    
-        num_heads: 8 
+        num_res_blocks: 1  # Reduced from 2
+        channel_mult: [1, 2, 4]  # Reduced from [1, 2, 4, 4]
+        num_heads: 4  # Reduced from 8
         use_spatial_transformer: True
         transformer_depth: 1
         context_dim: 768
@@ -69,13 +68,13 @@ model:
           resolution: 256
           in_channels: 3
           out_ch: 3
-          ch: 128
+          ch: 64  # Reduced from 128
           ch_mult:
           - 1
           - 2
           - 4
           - 4
-          num_res_blocks: 2
+          num_res_blocks: 1  # Reduced from 2
           attn_resolutions: []
           dropout: 0.0
         lossconfig:
@@ -86,9 +85,9 @@ model:
 data:
   target: simple_data_module.SimpleObjaverseDataModule
   params:
-    root_dir: 'views_release'  # Single object dataset (cleaned up)
+    root_dir: 'views_release'
     batch_size: 1
-    num_workers: 4
+    num_workers: 2  # Reduced from 4
     total_view: 2
     image_size: 256
 
@@ -99,7 +98,7 @@ lightning:
     params:
       dirpath: "checkpoints"
       filename: "{epoch:06}-{step:09}"
-      every_n_train_steps: 5  # Save very frequently for monitoring
+      every_n_train_steps: 5
       save_last: True
       save_top_k: -1
 
@@ -107,21 +106,18 @@ lightning:
     simple_checkpoint:
       target: simple_checkpoint_callback.SimpleCheckpointCallback
       params:
-        save_every_n_steps: 5  # Save very frequently
+        save_every_n_steps: 5
         save_dir: "checkpoints"
         filename_pattern: "simple-{epoch:06}-{step:09}"
 
   trainer:
     benchmark: True
-    val_check_interval: 0.1  # Check validation very frequently
+    val_check_interval: 0.5
     num_sanity_val_steps: 0
-    limit_val_batches: 0.0
-    accumulate_grad_batches: 1  # No gradient accumulation for faster overfitting
+    limit_val_batches: 0.0  # Disable validation to save memory
+    accumulate_grad_batches: 4
     gradient_clip_val: 1.0
     deterministic: False
     sync_batchnorm: False
     enable_progress_bar: True
-    max_epochs: 50  # Fewer epochs for single object
-    max_steps: 1000  # Limit steps for overfitting
-    accelerator: null
-    strategy: null 
+    max_epochs: 50 
