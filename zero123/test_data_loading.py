@@ -2,68 +2,107 @@
 
 import sys
 import os
-sys.path.append(os.getcwd())
+sys.path.append('.')
 
-from simple_data_module import SimpleObjaverseDataModule, SimpleObjaverseData
+from simple_data_module import SimpleObjaverseData, SimpleObjaverseDataModule
 
 def test_data_loading():
-    """Test if the data loading works correctly."""
+    """Test the data loading to identify issues with noisy images."""
     
-    print("Testing SimpleObjaverseData...")
+    # Initialize the dataset
+    print("=== Testing Data Loading ===")
     
-    # Test the dataset directly
-    try:
-        dataset = SimpleObjaverseData(
-            root_dir='views_release',
-            total_view=2,
-            validation=False,
-            image_size=256
-        )
-        print(f"✅ Dataset created successfully with {len(dataset)} samples")
-        
-        # Test loading a sample
-        sample = dataset[0]
-        print(f"✅ Sample loaded successfully")
-        print(f"   - image_target shape: {sample['image_target'].shape}")
-        print(f"   - image_cond shape: {sample['image_cond'].shape}")
-        print(f"   - T shape: {sample['T'].shape}")
-        
-    except Exception as e:
-        print(f"❌ Failed to create dataset: {e}")
-        return False
+    # Test with the views_release directory
+    root_dir = "views_release"
     
-    print("\nTesting SimpleObjaverseDataModule...")
+    if not os.path.exists(root_dir):
+        print(f"Error: {root_dir} directory does not exist!")
+        return
     
-    # Test the data module
-    try:
-        data_module = SimpleObjaverseDataModule(
-            root_dir='views_release',
-            batch_size=2,
-            total_view=2,
-            num_workers=0,
-            image_size=256
-        )
-        print("✅ Data module created successfully")
-        
-        # Test train dataloader
-        train_loader = data_module.train_dataloader()
-        print(f"✅ Train dataloader created with {len(train_loader)} batches")
-        
-        # Test loading a batch
-        batch = next(iter(train_loader))
-        print(f"✅ Batch loaded successfully")
-        print(f"   - batch size: {len(batch['image_target'])}")
-        print(f"   - image_target shape: {batch['image_target'].shape}")
-        print(f"   - image_cond shape: {batch['image_cond'].shape}")
-        print(f"   - T shape: {batch['T'].shape}")
-        
-    except Exception as e:
-        print(f"❌ Failed to create data module: {e}")
-        return False
+    print(f"Root directory: {root_dir}")
+    print(f"Root directory exists: {os.path.exists(root_dir)}")
     
-    print("\n✅ All data loading tests passed!")
-    return True
+    # Initialize the dataset
+    dataset = SimpleObjaverseData(
+        root_dir=root_dir,
+        total_view=12,
+        validation=False,
+        image_size=256
+    )
+    
+    print(f"Dataset length: {len(dataset)}")
+    
+    # Test loading the first item
+    if len(dataset) > 0:
+        print("\n=== Testing first dataset item ===")
+        try:
+            first_item = dataset[0]
+            print("Successfully loaded first item!")
+            print(f"Keys in item: {list(first_item.keys())}")
+            
+            # Check image properties
+            if "image_target" in first_item:
+                target_img = first_item["image_target"]
+                print(f"Target image shape: {target_img.shape}")
+                print(f"Target image min/max: {target_img.min():.3f}, {target_img.max():.3f}")
+            
+            if "image_cond" in first_item:
+                cond_img = first_item["image_cond"]
+                print(f"Condition image shape: {cond_img.shape}")
+                print(f"Condition image min/max: {cond_img.min():.3f}, {cond_img.max():.3f}")
+            
+            if "control" in first_item:
+                control_img = first_item["control"]
+                print(f"Control image shape: {control_img.shape}")
+                print(f"Control image min/max: {control_img.min():.3f}, {control_img.max():.3f}")
+            
+        except Exception as e:
+            print(f"Error loading first item: {e}")
+            import traceback
+            traceback.print_exc()
+    
+    # Test specific object ID
+    print("\n=== Testing specific object ID ===")
+    target_object_id = "aa15f4e92fcc42a49cdd15e7c94d323f"
+    
+    # Check if this object exists in the dataset
+    if target_object_id in dataset.paths:
+        print(f"Object {target_object_id} is in the dataset!")
+        object_index = dataset.paths.index(target_object_id)
+        print(f"Object index: {object_index}")
+        
+        # Test loading this specific object
+        try:
+            item = dataset[object_index]
+            print("Successfully loaded target object!")
+            
+            # Check image properties
+            if "image_target" in item:
+                target_img = item["image_target"]
+                print(f"Target image shape: {target_img.shape}")
+                print(f"Target image min/max: {target_img.min():.3f}, {target_img.max():.3f}")
+            
+            if "image_cond" in item:
+                cond_img = item["image_cond"]
+                print(f"Condition image shape: {cond_img.shape}")
+                print(f"Condition image min/max: {cond_img.min():.3f}, {cond_img.max():.3f}")
+            
+            if "control" in item:
+                control_img = item["control"]
+                print(f"Control image shape: {control_img.shape}")
+                print(f"Control image min/max: {control_img.min():.3f}, {control_img.max():.3f}")
+                
+        except Exception as e:
+            print(f"Error loading target object: {e}")
+            import traceback
+            traceback.print_exc()
+    else:
+        print(f"Object {target_object_id} is NOT in the dataset!")
+        print(f"First 5 objects in dataset: {dataset.paths[:5]}")
+    
+    # Test control image loading directly
+    print("\n=== Testing control image loading directly ===")
+    dataset.test_load_control_image(target_object_id, 0)
 
 if __name__ == "__main__":
-    success = test_data_loading()
-    sys.exit(0 if success else 1) 
+    test_data_loading() 

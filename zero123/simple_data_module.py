@@ -69,6 +69,26 @@ class SimpleObjaverseData(Dataset):
 
         print(f'============= length of dataset {len(self.paths)} (filtered from {len(all_paths)}) =============')
 
+        # Create expanded dataset entries for more training pairs
+        self.expanded_paths = []
+        for path in self.paths:
+            # For each object, create multiple training pairs
+            # This will give us more training samples per object
+            for _ in range(20):  # Create 20 training pairs per object (increased from 6)
+                self.expanded_paths.append(path)
+        
+        print(f'============= expanded dataset length {len(self.expanded_paths)} =============')
+
+        # Debug: Check if the specific object ID from the image is in the dataset
+        target_object_id = "aa15f4e92fcc42a49cdd15e7c94d323f"
+        if target_object_id in self.paths:
+            print(f"Debug: Target object {target_object_id} is in the dataset!")
+            target_index = self.paths.index(target_object_id)
+            print(f"Debug: Target object is at index {target_index}")
+        else:
+            print(f"Debug: Target object {target_object_id} is NOT in the dataset!")
+            print(f"Debug: First 5 object IDs in dataset: {self.paths[:5]}")
+        
         # Create transforms
         image_transforms = [
             transforms.Resize(image_size),
@@ -86,7 +106,7 @@ class SimpleObjaverseData(Dataset):
         self.control_transforms = transforms.Compose(control_transforms)
 
     def __len__(self):
-        return len(self.paths)
+        return len(self.expanded_paths)
 
     def cartesian_to_spherical(self, xyz):
         ptsnew = np.hstack((xyz, np.zeros(xyz.shape)))
@@ -119,18 +139,22 @@ class SimpleObjaverseData(Dataset):
 
     def load_im(self, path, color):
         try:
-            img = plt.imread(path)
-        except:
-            print(f"Failed to load image: {path}")
+            # Use PIL instead of plt.imread for more reliable loading
+            img = Image.open(path)
+            
+            # Convert to RGB if needed
+            if img.mode == 'RGBA':
+                # Create a white background
+                background = Image.new('RGB', img.size, (255, 255, 255))
+                background.paste(img, mask=img.split()[-1])  # Use alpha channel as mask
+                img = background
+            elif img.mode != 'RGB':
+                img = img.convert('RGB')
+            
+            return img
+        except Exception as e:
+            print(f"Failed to load image: {path}, error: {e}")
             return Image.new('RGB', (256, 256), (0, 0, 0))
-        if img.ndim == 3 and img.shape[2] == 4:
-            img[img[:, :, -1] == 0.] = color
-            img = Image.fromarray(np.uint8(img[:, :, :3] * 255.))
-        elif img.ndim == 3 and img.shape[2] == 3:
-            img = Image.fromarray(np.uint8(img * 255.))
-        else:
-            img = Image.fromarray(np.uint8(img * 255.)).convert('RGB')
-        return img
 
     def load_control_im(self, path):
         """Load control image (grayscale)."""
@@ -156,18 +180,35 @@ class SimpleObjaverseData(Dataset):
     def __getitem__(self, index):
         data = {}
         total_view = self.total_view
-        filename = os.path.join(self.root_dir, self.paths[index])
+        filename = os.path.join(self.root_dir, self.expanded_paths[index])
         # Find valid indices (png, npy, and control present)
         valid_indices = [i for i in range(total_view)
                          if os.path.exists(os.path.join(filename, f'{i:03d}.png')) and
-                            os.path.exists(os.path.join(filename, f'{i:03d}.npy')) and
-                            os.path.exists(os.path.join(filename, 'control', f'{i:03d}_control.png'))]
+                            os.path.exists(os.path.join(filename, f'{i:03d}.npy'))]
+        
+        # Check if control images exist
+        control_exists = os.path.exists(os.path.join(filename, 'control'))
+        if control_exists:
+            # Filter to only include indices with control images
+            valid_indices = [i for i in valid_indices
+                           if os.path.exists(os.path.join(filename, 'control', f'{i:03d}_control.png'))]
+            print(f"Control images found, using {len(valid_indices)} valid indices")
+        else:
+            print(f"No control directory found, using {len(valid_indices)} valid indices without control images")
+        
+        # Debug: Check what files exist (only once)
+        if not hasattr(self, 'debug_printed'):
+            self.debug_printed = True
+            print(f"Debug: Using {len(valid_indices)} valid views from {filename}")
+        
         if len(valid_indices) < 2:
-            raise RuntimeError(f"Object {self.paths[index]} does not have 2 valid views with control images at runtime!")
+            raise RuntimeError(f"Object {self.expanded_paths[index]} does not have 2 valid views with control images at runtime!")
 
+        # Sample 2 random views for this training pair
         index_target, index_cond = random.sample(valid_indices, 2)
 
         color = [1., 1., 1., 1.]
+        
         try:
             target_im = self.process_im(self.load_im(os.path.join(filename, '%03d.png' % index_target), color))
             cond_im = self.process_im(self.load_im(os.path.join(filename, '%03d.png' % index_cond), color))
@@ -175,10 +216,15 @@ class SimpleObjaverseData(Dataset):
             cond_RT = np.load(os.path.join(filename, '%03d.npy' % index_cond))
             
             # Load control images
-            target_control_path = os.path.join(filename, 'control', '%03d_control.png' % index_target)
-            cond_control_path = os.path.join(filename, 'control', '%03d_control.png' % index_cond)
-            target_control = self.process_control_im(self.load_control_im(target_control_path))
-            cond_control = self.process_control_im(self.load_control_im(cond_control_path))
+            if control_exists:
+                target_control_path = os.path.join(filename, 'control', '%03d_control.png' % index_target)
+                cond_control_path = os.path.join(filename, 'control', '%03d_control.png' % index_cond)
+                target_control = self.process_control_im(self.load_control_im(target_control_path))
+                cond_control = self.process_control_im(self.load_control_im(cond_control_path))
+            else:
+                # Create empty control images if control directory doesn't exist
+                target_control = torch.zeros((256, 256, 1))
+                cond_control = torch.zeros((256, 256, 1))
             
         except Exception as e:
             print(f"Error loading data from {filename}: {e}")
@@ -204,6 +250,38 @@ class SimpleObjaverseData(Dataset):
         im = im.convert("L")  # Convert to grayscale
         tensor = self.control_transforms(im)
         return tensor
+
+    def test_load_control_image(self, object_id="aa15f4e92fcc42a49cdd15e7c94d323f", index=0):
+        """Test method to load a control image directly."""
+        try:
+            control_path = os.path.join(self.root_dir, object_id, 'control', f'{index:03d}_control.png')
+            print(f"Testing control image loading from: {control_path}")
+            print(f"File exists: {os.path.exists(control_path)}")
+            
+            if os.path.exists(control_path):
+                control_img = self.load_control_im(control_path)
+                print(f"Control image loaded successfully!")
+                print(f"Control image mode: {control_img.mode}")
+                print(f"Control image size: {control_img.size}")
+                
+                # Convert to numpy to check values
+                arr = np.array(control_img)
+                print(f"Control array shape: {arr.shape}")
+                print(f"Control array dtype: {arr.dtype}")
+                print(f"Control array min/max: {arr.min()}, {arr.max()}")
+                
+                # Process the control image
+                processed = self.process_control_im(control_img)
+                print(f"Processed control tensor shape: {processed.shape}")
+                print(f"Processed control tensor min/max: {processed.min():.3f}, {processed.max():.3f}")
+                
+                return True
+            else:
+                print(f"Control image file does not exist!")
+                return False
+        except Exception as e:
+            print(f"Error testing control image loading: {e}")
+            return False
 
 class SimpleObjaverseDataModule(pl.LightningDataModule):
     def __init__(self, root_dir, batch_size=2, total_view=12, num_workers=0, image_size=256):

@@ -69,7 +69,14 @@ class ControlledUnetModel(UNetModel):
         h = self.middle_block(h, emb, context)
 
         if control is not None:
-            h += control.pop()
+            control_feature = control.pop()
+            if hasattr(self, 'debug_count'):
+                self.debug_count += 1
+            else:
+                self.debug_count = 0
+            if self.debug_count < 5:
+                print(f"Debug UNet: h shape: {h.shape}, control_feature shape: {control_feature.shape}")
+            h += control_feature
 
         for i, module in enumerate(self.output_blocks):
             if only_mid_control or control is None:
@@ -352,7 +359,7 @@ class ControlLDM(LatentDiffusion):
         self.control_model = instantiate_from_config(control_stage_config)
         self.control_key = control_key
         self.only_mid_control = only_mid_control
-        self.control_scales = [1.0] * 13
+        self.control_scales = [1.0] * 12  # Match the number of control features (11 input + 1 middle)
         self.sd_locked = False  # Add missing attribute
         
         # Create output directory for debugging images
@@ -397,6 +404,67 @@ class ControlLDM(LatentDiffusion):
             # Fallback
             cond_txt = cond['c_crossattn']
 
+        # Debug: Print tensor shapes
+        if hasattr(self, 'debug_count'):
+            self.debug_count += 1
+        else:
+            self.debug_count = 0
+            
+        if self.debug_count < 10:  # Print first 10 times for more debugging
+            print(f"Debug {self.debug_count}: cond_txt shape BEFORE processing: {cond_txt.shape}")
+            print(f"Debug {self.debug_count}: cond_txt dtype: {cond_txt.dtype}")
+            print(f"Debug {self.debug_count}: x_noisy shape: {x_noisy.shape}")
+            if cond['c_concat'] is not None:
+                print(f"Debug {self.debug_count}: control_image shape: {cond['c_concat'][0].shape}")
+
+        # Ensure cond_txt has the correct shape for attention - MORE ROBUST HANDLING
+        if cond_txt.dim() == 3:
+            # Shape should be [batch, sequence_length, context_dim]
+            # Check if there are any extra dimensions of size 1
+            if cond_txt.shape[1] == 1 and cond_txt.shape[2] == 1:
+                # If it's [B, 1, 1, D], squeeze it
+                cond_txt = cond_txt.squeeze(1).squeeze(1)
+                cond_txt = cond_txt.unsqueeze(1)  # Back to [B, 1, D]
+            pass
+        elif cond_txt.dim() == 2:
+            # Add batch dimension if missing
+            cond_txt = cond_txt.unsqueeze(0)
+        elif cond_txt.dim() == 4:
+            # If it's [B, 1, 1, D], squeeze the extra dimensions
+            cond_txt = cond_txt.squeeze(1).squeeze(1)
+            cond_txt = cond_txt.unsqueeze(1)  # Back to [B, 1, D]
+        else:
+            # Reshape to expected format - be more careful
+            if cond_txt.dim() > 3:
+                # Squeeze extra dimensions
+                while cond_txt.dim() > 3:
+                    cond_txt = cond_txt.squeeze(-2)
+            # Ensure it's [B, S, D]
+            if cond_txt.dim() == 2:
+                cond_txt = cond_txt.unsqueeze(1)
+            elif cond_txt.dim() != 3:
+                # Last resort: reshape to [B, -1, D]
+                cond_txt = cond_txt.view(cond_txt.size(0), -1, cond_txt.size(-1))
+
+        if self.debug_count < 10:
+            print(f"Debug {self.debug_count}: cond_txt shape AFTER processing: {cond_txt.shape}")
+
+        # FINAL CHECK: Ensure the tensor is exactly [B, S, D] format
+        if cond_txt.dim() != 3:
+            print(f"ERROR: cond_txt has wrong dimensions: {cond_txt.shape}")
+            # Force it to be [B, S, D]
+            if cond_txt.dim() == 2:
+                cond_txt = cond_txt.unsqueeze(1)
+            elif cond_txt.dim() > 3:
+                cond_txt = cond_txt.view(cond_txt.size(0), -1, cond_txt.size(-1))
+            print(f"FORCED cond_txt shape: {cond_txt.shape}")
+
+        # IMPORTANT: Ensure batch size consistency
+        # If we're in generation mode (batch_size=1), ensure cond_txt also has batch_size=1
+        if x_noisy.size(0) == 1 and cond_txt.size(0) != 1:
+            print(f"Fixing batch size: cond_txt {cond_txt.shape} -> batch_size=1")
+            cond_txt = cond_txt[:1]  # Take only first sample
+
         if cond['c_concat'] is None:
             eps = diffusion_model(x=x_noisy, timesteps=t, context=cond_txt, control=None, only_mid_control=self.only_mid_control)
         else:
@@ -404,11 +472,29 @@ class ControlLDM(LatentDiffusion):
             control_image = cond['c_concat'][0]  # Edge map (hint)
             
             # Process control image with ControlNet (ControlNet gets VAE latent + hint)
-            control = self.control_model(x=x_noisy, hint=control_image, timesteps=t, context=cond_txt)
-            control = [c * scale for c, scale in zip(control, self.control_scales)]
-            
-            # UNet gets VAE latent + control features (no input image concatenation)
-            eps = diffusion_model(x=x_noisy, timesteps=t, context=cond_txt, control=control, only_mid_control=self.only_mid_control)
+            try:
+                control = self.control_model(x=x_noisy, hint=control_image, timesteps=t, context=cond_txt)
+                
+                # Debug: Print control feature shapes
+                if self.debug_count < 5:
+                    print(f"Debug {self.debug_count}: Number of control features: {len(control)}")
+                    for i, c in enumerate(control):
+                        print(f"Debug {self.debug_count}: Control feature {i} shape: {c.shape}")
+                
+                control = [c * scale for c, scale in zip(control, self.control_scales)]
+                
+                # UNet gets VAE latent + control features (no input image concatenation)
+                eps = diffusion_model(x=x_noisy, timesteps=t, context=cond_txt, control=control, only_mid_control=self.only_mid_control)
+            except Exception as e:
+                print(f"ERROR in ControlNet forward pass: {e}")
+                print(f"cond_txt shape at error: {cond_txt.shape}")
+                print(f"x_noisy shape at error: {x_noisy.shape}")
+                print(f"control_image shape at error: {control_image.shape}")
+                print(f"Number of control features: {len(control) if 'control' in locals() else 'N/A'}")
+                if 'control' in locals():
+                    for i, c in enumerate(control):
+                        print(f"Control feature {i} shape: {c.shape}")
+                raise e
 
         return eps
 
@@ -547,27 +633,252 @@ class ControlLDM(LatentDiffusion):
         loss = super().training_step(batch, batch_idx)
         print(f"[Step {batch_idx}] Training loss: {loss.item():.5f}")
         
-        # Save debug images every 10 steps during training
+        # Debug: Check if model is learning by testing simple generation
         if batch_idx % 10 == 0:
             try:
-                # Generate samples for debugging
-                x, c = self.get_input(batch, self.first_stage_key, bs=1)
-                c_cat = c["c_concat"][0][:1] if isinstance(c["c_concat"][0], torch.Tensor) else c["c_concat"][0]
-                c_cross = c["c_crossattn"][0][:1] if isinstance(c["c_crossattn"][0], torch.Tensor) else c["c_crossattn"][0]
+                # Test simple generation without DDIM sampling
+                self.test_simple_generation(batch, f"train_test_{self.global_step}")
                 
-                # Generate samples
-                samples, _ = self.sample_log(cond={"c_concat": [c_cat], "c_crossattn": [c_cross]},
-                                           batch_size=1, ddim=True, ddim_steps=50)
-                
-                # Save debug images
-                self.save_debug_images(batch, samples, f"train_{self.global_step}")
+                # Test VAE functionality
+                self.test_vae_functionality(batch, f"train_vae_{self.global_step}")
                 
             except Exception as e:
-                print(f"Failed to save training debug images: {e}")
+                print(f"Failed to test simple generation: {e}")
+                import traceback
+                traceback.print_exc()
+        
+        # Save debug images every 50 steps during training (without sampling)
+        if batch_idx % 50 == 0:
+            try:
+                # Save input images and control images directly
+                self.save_training_images(batch, f"step_{self.global_step}")
+                
+            except Exception as e:
+                print(f"Failed to save training images: {e}")
                 import traceback
                 traceback.print_exc()
         
         return loss
+
+    def test_simple_generation(self, batch, step_name):
+        """Test simple generation without DDIM sampling to see if model is learning"""
+        try:
+            # Get input data
+            x, c = self.get_input(batch, self.first_stage_key, bs=1)
+            
+            # IMPORTANT: Fix batch size for all tensors
+            if c["c_crossattn"] is not None and len(c["c_crossattn"]) > 0:
+                c_crossattn = c["c_crossattn"][0]
+                if isinstance(c_crossattn, list) and len(c_crossattn) > 0:
+                    # Ensure batch size is 1 for generation
+                    if c_crossattn[0].size(0) != 1:
+                        c_crossattn[0] = c_crossattn[0][:1]
+                elif isinstance(c_crossattn, torch.Tensor):
+                    if c_crossattn.size(0) != 1:
+                        c_crossattn = c_crossattn[:1]
+                    c["c_crossattn"][0] = c_crossattn
+            
+            # Test: Add a small amount of noise and see if model can denoise it
+            with torch.no_grad():
+                # Add noise to input
+                noise = torch.randn_like(x[:1]) * 0.1
+                x_noisy = x[:1] + noise
+                
+                # Get model prediction
+                t = torch.tensor([50], device=self.device)  # Middle timestep
+                eps = self.apply_model(x_noisy, t, c)
+                
+                # Simple denoising step
+                alpha_t = self.alphas_cumprod[t]
+                x_denoised = (x_noisy - torch.sqrt(1 - alpha_t) * eps) / torch.sqrt(alpha_t)
+                
+                # Decode
+                generated = self.decode_first_stage(x_denoised)
+                # Note: Removed saving of test_simple and test_original files as requested
+                
+        except Exception as e:
+            print(f"Error in test simple generation: {e}")
+            import traceback
+            traceback.print_exc()
+
+    def save_training_images(self, batch, step_name):
+        """Save images with step numbers to track progress over iterations"""
+        try:
+            # Save condition image (input image that conditions generation)
+            if "image_cond" in batch:
+                cond_img = batch["image_cond"][:1]  # Take first sample
+                # Check tensor dimensions and handle accordingly
+                if cond_img.dim() == 3:  # [H, W, C]
+                    cond_img = cond_img.permute(2, 0, 1).unsqueeze(0)  # [1, C, H, W]
+                elif cond_img.dim() == 4:  # [B, H, W, C]
+                    cond_img = cond_img.permute(0, 3, 1, 2)  # [B, C, H, W]
+                # Normalize to [0, 1] range
+                cond_img = (cond_img + 1) / 2
+                cond_img = torch.clamp(cond_img, 0, 1)
+                save_image(cond_img, f"debug_outputs/condition_{step_name}.png")
+            
+            # Save control image (edge maps, depth maps, etc.)
+            x, c = self.get_input(batch, self.first_stage_key, bs=1)
+            if c["c_concat"] is not None:
+                control_img = c["c_concat"][0][:1]  # Take first sample
+                # Convert from [B, C, H, W] to [B, H, W, C] for saving
+                control_img = control_img.permute(0, 2, 3, 1)
+                # For control images, preserve the original range without normalization
+                # Control images should stay as black background with white borders
+                control_img = torch.clamp(control_img, 0, 1)
+                save_image(control_img.permute(0, 3, 1, 2), f"debug_outputs/control_{step_name}.png")
+            
+            # Save target image (what the model should learn to generate)
+            if "image_target" in batch:
+                target_img = batch["image_target"][:1]  # Take first sample
+                # Check tensor dimensions and handle accordingly
+                if target_img.dim() == 3:  # [H, W, C]
+                    target_img = target_img.permute(2, 0, 1).unsqueeze(0)  # [1, C, H, W]
+                elif target_img.dim() == 4:  # [B, H, W, C]
+                    target_img = target_img.permute(0, 3, 1, 2)  # [B, C, H, W]
+                # Normalize to [0, 1] range
+                target_img = (target_img + 1) / 2
+                target_img = torch.clamp(target_img, 0, 1)
+                save_image(target_img, f"debug_outputs/target_{step_name}.png")
+            
+            # Save generated image using proper sampling
+            self.save_generated_image(batch, step_name)
+            
+            print(f"Saved images to debug_outputs/ for step {step_name}")
+            
+        except Exception as e:
+            print(f"Error saving images: {e}")
+            import traceback
+            traceback.print_exc()
+
+    def save_generated_image(self, batch, step_name):
+        """Save generated image using proper sampling"""
+        try:
+            # Get input data
+            x, c = self.get_input(batch, self.first_stage_key, bs=1)
+            
+            # Prepare conditioning - handle the nested structure properly
+            if c["c_concat"] is not None and len(c["c_concat"]) > 0:
+                c_cat = c["c_concat"][0][:1] if isinstance(c["c_concat"][0], torch.Tensor) else c["c_concat"][0]
+            else:
+                c_cat = None
+                
+            if c["c_crossattn"] is not None and len(c["c_crossattn"]) > 0:
+                c_cross = c["c_crossattn"][0][:1] if isinstance(c["c_crossattn"][0], torch.Tensor) else c["c_crossattn"][0]
+            else:
+                c_cross = None
+            
+            # Debug: Print conditioning shapes
+            print(f"Debug save_generated: c_cat shape: {c_cat.shape if c_cat is not None else 'None'}")
+            print(f"Debug save_generated: c_cross type: {type(c_cross)}")
+            if isinstance(c_cross, torch.Tensor):
+                print(f"Debug save_generated: c_cross shape: {c_cross.shape}")
+                print(f"Debug save_generated: c_cross dtype: {c_cross.dtype}")
+            elif isinstance(c_cross, dict):
+                print(f"Debug save_generated: c_cross keys: {c_cross.keys()}")
+                if 'c_crossattn' in c_cross:
+                    c_crossattn = c_cross['c_crossattn']
+                    print(f"Debug save_generated: c_crossattn type: {type(c_crossattn)}")
+                    if isinstance(c_crossattn, list):
+                        print(f"Debug save_generated: c_crossattn list length: {len(c_crossattn)}")
+                        if len(c_crossattn) > 0:
+                            print(f"Debug save_generated: c_crossattn[0] type: {type(c_crossattn[0])}")
+                            if isinstance(c_crossattn[0], torch.Tensor):
+                                print(f"Debug save_generated: c_crossattn[0] shape: {c_crossattn[0].shape}")
+                    elif isinstance(c_crossattn, torch.Tensor):
+                        print(f"Debug save_generated: c_crossattn shape: {c_crossattn.shape}")
+            else:
+                print(f"Debug save_generated: c_cross: {c_cross}")
+            
+            # Fix c_crossattn shape if needed
+            if c_cross is not None:
+                if isinstance(c_cross, torch.Tensor):
+                    # IMPORTANT: Fix batch size for sampling (should be 1, not 4)
+                    if c_cross.size(0) != 1:
+                        c_cross = c_cross[:1]  # Take only first sample
+                    if c_cross.dim() == 2:
+                        # If it's [B, D], add sequence dimension: [B, 1, D]
+                        c_cross = c_cross.unsqueeze(1)
+                    elif c_cross.dim() > 3:
+                        # If it has extra dimensions, squeeze them
+                        while c_cross.dim() > 3:
+                            c_cross = c_cross.squeeze(-2)
+                    print(f"Debug save_generated: c_cross shape AFTER fix: {c_cross.shape}")
+                elif isinstance(c_cross, dict):
+                    # Handle dictionary case
+                    if 'c_crossattn' in c_cross:
+                        c_crossattn = c_cross['c_crossattn']
+                        if isinstance(c_crossattn, list) and len(c_crossattn) > 0:
+                            c_cross_tensor = c_crossattn[0]
+                            # IMPORTANT: Fix batch size for sampling (should be 1, not 4)
+                            if c_cross_tensor.size(0) != 1:
+                                c_cross_tensor = c_cross_tensor[:1]  # Take only first sample
+                            if c_cross_tensor.dim() == 2:
+                                c_cross_tensor = c_cross_tensor.unsqueeze(1)
+                            elif c_cross_tensor.dim() > 3:
+                                while c_cross_tensor.dim() > 3:
+                                    c_cross_tensor = c_cross_tensor.squeeze(-2)
+                            c_crossattn[0] = c_cross_tensor
+                            print(f"Debug save_generated: c_crossattn[0] shape AFTER fix: {c_cross_tensor.shape}")
+                        elif isinstance(c_crossattn, torch.Tensor):
+                            # IMPORTANT: Fix batch size for sampling (should be 1, not 4)
+                            if c_crossattn.size(0) != 1:
+                                c_crossattn = c_crossattn[:1]  # Take only first sample
+                            if c_crossattn.dim() == 2:
+                                c_crossattn = c_crossattn.unsqueeze(1)
+                            elif c_crossattn.dim() > 3:
+                                while c_crossattn.dim() > 3:
+                                    c_crossattn = c_crossattn.squeeze(-2)
+                            c_cross['c_crossattn'] = c_crossattn
+                            print(f"Debug save_generated: c_crossattn shape AFTER fix: {c_crossattn.shape}")
+            
+            # Create conditioning dict
+            cond = {"c_concat": [c_cat], "c_crossattn": [c_cross]}
+            
+            # Use DDIM sampler with fewer steps for faster generation
+            ddim_steps = 20  # Reduced from 50 for speed
+            ddim_eta = 0.0
+            
+            # Sample
+            with torch.no_grad():
+                samples, _ = self.sample_log(
+                    cond=cond,
+                    batch_size=1,
+                    ddim=True,
+                    ddim_steps=ddim_steps,
+                    eta=ddim_eta
+                )
+                
+                # Decode the samples
+                generated = self.decode_first_stage(samples[:1])
+                save_image(generated, f"debug_outputs/generated_{step_name}.png")
+                print(f"Saved generated image to debug_outputs/generated_{step_name}.png")
+                
+        except Exception as e:
+            print(f"Error in generation: {e}")
+            import traceback
+            traceback.print_exc()
+            # If generation fails, try a simpler approach
+            self.save_simple_generated_image(batch, step_name)
+
+    def save_simple_generated_image(self, batch, step_name):
+        """Fallback: Save a simple generated image using a single forward pass"""
+        try:
+            # Get input data
+            x, c = self.get_input(batch, self.first_stage_key, bs=1)
+            
+            # Just save the input reconstruction as a simple fallback
+            # This avoids the complex sampling that's causing issues
+            with torch.no_grad():
+                # Decode the input latent directly
+                generated = self.decode_first_stage(x[:1])
+                save_image(generated, f"debug_outputs/generated_simple_{step_name}.png")
+                print(f"Saved simple generated image (input reconstruction) to debug_outputs/generated_simple_{step_name}.png")
+                
+        except Exception as e:
+            print(f"Error in simple generation: {e}")
+            # If simple generation fails, just skip it
+            pass
 
     def low_vram_shift(self, is_diffusing):
         if is_diffusing:
@@ -580,3 +891,48 @@ class ControlLDM(LatentDiffusion):
             self.control_model = self.control_model.cpu()
             self.first_stage_model = self.first_stage_model.cuda()
             self.cond_stage_model = self.cond_stage_model.cuda() 
+
+    def validation_step(self, batch, batch_idx):
+        """Validation step without saving images"""
+        loss = super().validation_step(batch, batch_idx)
+        return loss 
+
+    def test_vae_functionality(self, batch, step_name):
+        """Test if VAE encoding/decoding is working properly"""
+        try:
+            # Get input data
+            x, c = self.get_input(batch, self.first_stage_key, bs=1)
+            
+            print(f"Debug VAE: x shape: {x.shape}")
+            print(f"Debug VAE: x dtype: {x.dtype}")
+            print(f"Debug VAE: x min/max: {x.min().item():.3f}/{x.max().item():.3f}")
+            
+            # Test VAE reconstruction
+            with torch.no_grad():
+                # Check if x has the right number of channels for VAE
+                if x.size(1) != 3:  # VAE expects 3 channels (RGB)
+                    print(f"Warning: VAE expects 3 channels, got {x.size(1)}. Skipping VAE test.")
+                    print(f"This suggests the input images might be in a different format (RGBA, grayscale, etc.)")
+                    return
+                
+                # Encode and decode the input
+                encoded = self.encode_first_stage(x[:1])
+                decoded = self.decode_first_stage(encoded)
+                
+                # Save the VAE reconstruction
+                save_image(decoded, f"debug_outputs/vae_test_{step_name}.png")
+                print(f"Saved VAE test to debug_outputs/vae_test_{step_name}.png")
+                
+                # Also save the original input
+                original = self.decode_first_stage(x[:1])
+                save_image(original, f"debug_outputs/vae_original_{step_name}.png")
+                print(f"Saved VAE original to debug_outputs/vae_original_{step_name}.png")
+                
+                # Check if they're similar
+                mse = torch.mean((decoded - original) ** 2)
+                print(f"VAE reconstruction MSE: {mse.item():.6f}")
+                
+        except Exception as e:
+            print(f"Error in VAE test: {e}")
+            import traceback
+            traceback.print_exc() 
