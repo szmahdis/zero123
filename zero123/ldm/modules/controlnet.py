@@ -213,7 +213,7 @@ class ControlNet(nn.Module):
             nn.SiLU(),
             conv_nd(dims, 512, 512, 3, padding=1),
             nn.SiLU(),
-            zero_module(conv_nd(dims, 512, model_channels, 3, padding=1))
+            conv_nd(dims, 512, model_channels, 3, padding=1)
         )
 
         self._feature_size = model_channels
@@ -331,13 +331,25 @@ class ControlNet(nn.Module):
         self._feature_size += ch
 
     def make_zero_conv(self, channels):
-        return TimestepEmbedSequential(zero_module(conv_nd(self.dims, channels, channels, 1, padding=0)))
+        return TimestepEmbedSequential(conv_nd(self.dims, channels, channels, 1, padding=0))
 
     def forward(self, x, hint, timesteps, context, **kwargs):
         t_emb = timestep_embedding(timesteps, self.model_channels, repeat_only=False)
         emb = self.time_embed(t_emb)
 
+        # Log ControlNet input hint statistics
+        print(f"  ControlNet input hint: shape={hint.shape}, mean={hint.mean().item():.4f}, std={hint.std().item():.4f}, range=[{hint.min().item():.3f}, {hint.max().item():.3f}]")
+        
+        # Log final conv weight stats from input_hint_block
+        final_conv = self.input_hint_block[-1]
+        if hasattr(final_conv, 'weight'):
+            print(f"    Final conv weight stats: mean={final_conv.weight.mean().item():.4f}, std={final_conv.weight.std().item():.4f}")
+
         guided_hint = self.input_hint_block(hint, emb, context)
+        
+        # Log hint features after processing
+        print(f"  After input_hint_block: shape={guided_hint.shape}, mean={guided_hint.mean().item():.4f}, std={guided_hint.std().item():.4f}, range=[{guided_hint.min().item():.3f}, {guided_hint.max().item():.3f}]")
+        print(f"hint features: {guided_hint.mean().item():.4f}, {guided_hint.std().item():.4f}")
 
         outs = []
 
@@ -348,6 +360,11 @@ class ControlNet(nn.Module):
 
         h = self.middle_block(h, emb, context)
         outs.append(self.middle_block_out(h, emb, context))
+
+        # Log ControlNet output feature maps
+        print(f"ControlNet produced {len(outs)} feature maps")
+        for i, feature in enumerate(outs):
+            print(f"  feature[{i}].shape={feature.shape}, mean={feature.mean().item():.4f}, std={feature.std().item():.4f}")
 
         return outs
 
